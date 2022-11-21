@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>기본 템플릿</title>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="w3-sidebar w3-light-grey w3-bar-block" style="width:15%">
+    <h6 class="w3-bar-item">
+        <div class="w3-container w3-gray">DB 연결정보 <br> HOST: <br> PORT: <br> Database: </div>
+    </h5>
+        <a href="/dblogin" class="w3-bar-item w3-button">DB 연결 관리</a>
+        <a href="/tablescan" class="w3-bar-item w3-button">테이블 속성 도메인 스캔</a>
+        <a href="/tablerevise" class="w3-bar-item w3-button">테이블 속성 편집</a>
+        <a href="/singlejoin" class="w3-bar-item w3-button">단일 결합</a>
+        <a href="/multiplejoin" class="w3-bar-item w3-button">다중 결합</a>
+        <a href="/result" class="w3-bar-item w3-button">결과 조회</a>
+    </div>
+  
+    <!-- Page Content -->
+    <div style="margin-left:15%">
+        <div class="w3-container w3-teal">
+            <h1>데이터 특성 스캔 및 결합 시스템</h1>
+        </div>
+  
+        <div class="w3-container">
+            <h2>기본 템플릿입니다</h2>
+            <p>각자 파트에 맞는 html파일을 작성해주세요</p>
+            <p>flask 템플릿 상속 기능 사용하는 게 좋을 듯 합니다.</p>
+        </div>
+  
+    </div>
+    {% block content %}{% endblock %}
+</body>
+</html>
