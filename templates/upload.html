@@ -1,0 +1,16 @@
+{% extends "index.html"  %}
+{% block content %}
+    <h1 style="margin-left:20%">CSV 업로드</h1>
+    <div style="margin-left:20%">
+        <form method="post" action="/dblogin/upload" enctype="multipart/form-data">
+            <div>
+                <label for="csv">파일경로: </label>
+                <input type="file" id="csv" name="csv" accept=".csv">
+            </div>
+            <div>
+                <input type="submit" value="CSV 업로드">
+                <p style="color:royalblue">{{ msg }}</p>
+            </div>
+        </form>
+    </div>
+{% endblock %}

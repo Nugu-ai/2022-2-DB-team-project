@@ -1,4 +1,32 @@
 {% extends "index.html"  %}
 {% block content %}
-    <h1 style="margin-left:15%">DB 연결관리입니다</h1>
+    <h1 style="margin-left:20%">DB 연결관리</h1>
+    <div style="margin-left:20%">
+        <form method="post" action="/dblogin">
+            <div>
+                <label for="host">HOST: </label>
+                <input type="text" name="host" id="host" autofocus required>
+                <br>
+
+                <label for="port">PORT: </label>
+                <input type="number" name="port" id="port" required>
+                <br>
+
+                <label for="database">DATABASE: </label>
+                <input type="text" name="database" id="database" required>
+                <br>
+
+                <label for="user">USER: </label>
+                <input type="text" name="user" id="user" required>
+                <br>
+
+                <label for="password">PASSWORD: </label>
+                <input type="password" name="password" id="password">
+            </div>
+            <div>
+                <input type="submit" value="Connect">
+                <p style="color:red">{{ err }}</p>
+            </div>
+        </form>
+    </div>
 {% endblock %}
