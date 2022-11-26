@@ -1,4 +1,40 @@
 {% extends "index.html"  %}
 {% block content %}
-    <p style="margin-left:15%">테이블 속성 도메인 스캔입니다</p>
+    <h1 style="margin-left:20%">테이블 속성 도메인 스캔</h1>
+    <div style="margin-left:20%">
+        <p>대상 테이블 선택</p>
+        <table style="border:1px solid black">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid black">테이블 명</th>
+                    <th style="border: 1px solid black">레코드 수</th>
+                    <th style="border: 1px solid black">속성</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in result %}
+                <tr onclick="select(id)" id="{{ row['table_name'] }}">
+                    <td style="border: 1px solid black">{{ row["table_name"] }}</td>
+                    <td style="border: 1px solid black">{{ row["records"] }}</td>
+                    <td style="border: 1px solid black">{{ row["attrs"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button onclick="redirectTo()">다음</button>
+    </div>
+    <script>
+        let selectedElement;
+
+        function select(id) {
+            if (selectedElement) document.getElementById(selectedElement).style.backgroundColor = 'white';
+            selectedElement = id;
+            document.getElementById(selectedElement).style.backgroundColor = '#009688';
+        }
+        
+        function redirectTo() {
+            console.log(selectedElement);
+            window.location.href = '/tablescan/' + selectedElement;
+        }
+    </script>
 {% endblock %}

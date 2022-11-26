@@ -2,6 +2,8 @@
 {% block content %}
     <h1 style="margin-left:20%">DB 연결관리</h1>
     <div style="margin-left:20%">
+        <button>DB 연결</button>
+        <button onclick="checkConnection()">CSV 업로드</button>
         <form method="post" action="/dblogin">
             <div>
                 <label for="host">HOST: </label>
@@ -24,9 +26,34 @@
                 <input type="password" name="password" id="password">
             </div>
             <div>
-                <input type="submit" value="Connect">
-                <p style="color:red">{{ err }}</p>
+                <input type="submit" value="Connect" id="connect">
+                <p style="color:red">{{ msg }}</p>
             </div>
         </form>
+        <form method="post" action="/dblogin/disconnect">
+            <input type="submit" value="Disconnect" id="disconnect">
+        </form>
     </div>
+    <script>
+        function checkConnection() {
+            if ("{{ session['database'] }}") window.location.href='/dblogin/upload'
+            else alert('DB에 연결되어 있지 않음')
+        }
+        
+        if ("{{ session['database'] }}") {
+            document.getElementById('host').disabled = true;
+            document.getElementById('port').disabled = true;
+            document.getElementById('database').disabled = true;
+            document.getElementById('user').disabled = true;
+            document.getElementById('password').disabled = true;
+            document.getElementById('connect').disabled = true;
+
+            document.getElementById('host').value = "{{ host }}";
+            document.getElementById('port').value = "{{ port }}";
+            document.getElementById('database').value = "{{ database }}";
+            document.getElementById('user').value = "{{ user }}";
+        } else {
+            document.getElementById('disconnect').disabled = true;
+        }
+    </script>
 {% endblock %}
