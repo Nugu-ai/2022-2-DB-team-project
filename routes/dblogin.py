@@ -72,12 +72,13 @@ def upload():
 
                 # CSV -> TABLE 생성
                 table_name = file.filename.split(".")[0]
-                all_table_list_stmt = f'SELECT `table_name` FROM `TABLE_LIST`'
+                all_table_list_stmt = 'SELECT `table_name` FROM `TABLE_LIST`'
                 cur.execute(all_table_list_stmt)
                 all_table_list = []
                 for names in cur.fetchall():
                     all_table_list.append(names[0])
 
+                # 테이블 명 중복 체크
                 if table_name not in all_table_list:
                     col_stmt = ''
                     for col in df.columns:
@@ -90,31 +91,70 @@ def upload():
                     create_stmt = f'CREATE TABLE IF NOT EXISTS `{table_name}` ({col_stmt[:-2]})'
                     cur.execute(create_stmt)
 
-                    for idx in df.index:
+                    for row in df.index:
                         stmt = ''
                         for col in df.columns:
-                            if df[col].dtype == object:
-                                stmt += f"'{df[col][idx]}', "
-                            else:
-                                stmt += f"{df[col][idx]}, "
-                        insert_stmt = f'INSERT INTO {table_name} VALUES ({stmt[:-2]})'
+                            data = df[col][row] if not pd.isnull(df[col][row]) else 'NULL'
+                            stmt += f"'{data}', " if df[col].dtype == object and data != 'NULL' else f"{data}, "
+                        insert_stmt = f'INSERT INTO `{table_name}` VALUES ({stmt[:-2]})'
                         cur.execute(insert_stmt)
 
-                    # TABLE_LIST, ATTR 테이블에 추가
+                    # TABLE_LIST에 추가
                     table_list_stmt = f'INSERT INTO `TABLE_LIST` VALUES ("{table_name}", "F")'
+                    cur.execute(table_list_stmt)
+
+                    # ATTR에 추가
                     count_stmt = f'SELECT COUNT(*) FROM {table_name}'
                     cur.execute(count_stmt)
                     record_count = cur.fetchone()[0]
-                    attr_stmt = 'INSERT INTO `ATTR`(table_name, attr_name, data_type, record_count) VALUES '
+                    attr_stmt = 'INSERT INTO `ATTR` VALUES '
+                    catg_attr_stmt = 'INSERT INTO `CATEGORICAL_ATTR` VALUES '
+                    catg_exists = False
+                    numr_attr_stmt = 'INSERT INTO `NUMERIC_ATTR` VALUES '
+                    numr_exists = False
                     for col in df.columns:
-                        if df[col].dtype == int:
-                            attr_stmt += f'("{table_name}", "{col}", "INT", {record_count}), '
-                        elif df[col].dtype == float:
-                            attr_stmt += f'("{table_name}", "{col}", "DOUBLE", {record_count}), '
+                        dtype, is_numeric = ('VARCHAR', 'F') if df[col].dtype == object \
+                            else (('DOUBLE', 'T') if df[col].dtype == float else ('INT', 'T'))
+                        
+                        cur.execute(f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` is NULL')
+                        null_count = cur.fetchone()[0]
+
+                        cur.execute(f'SELECT COUNT(DISTINCT `{col}`) FROM {table_name}')
+                        distinct_count = cur.fetchone()[0]
+
+                        is_candidate = 'T' if distinct_count / record_count > 0.9 else 'F'
+
+                        attr_stmt += f'("{table_name}", "{col}", "{dtype}", {null_count}, {record_count}, {distinct_count}, "{is_candidate}", "{is_numeric}"), '
+
+                        # 범주속성 -> CATEGORICAL_ATTR
+                        if dtype == 'VARCHAR':
+                            cur.execute(f'SELECT `{col}` FROM {table_name}')
+                            symbol_count = 0
+                            for data in cur.fetchall():
+                                if data[0] is not None and not data[0].isalnum():
+                                    symbol_count += 1
+                            catg_attr_stmt += f'("{table_name}", "{col}", {symbol_count}), '
+                            catg_exists = True
+                            
+                        # 수치속성 -> NUMERICAL_ATTR
                         else:
-                            attr_stmt += f'("{table_name}", "{col}", "VARCHAR", {record_count}), '
-                    cur.execute(table_list_stmt)
+                            cur.execute(f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` = 0')
+                            zero_count = cur.fetchone()[0]
+
+                            cur.execute(f'SELECT MAX(`{col}`) FROM {table_name}')
+                            max_value = cur.fetchone()[0]
+
+                            cur.execute(f'SELECT MIN(`{col}`) FROM {table_name}')
+                            min_value = cur.fetchone()[0]
+
+                            numr_attr_stmt += f'("{table_name}", "{col}", {zero_count}, {min_value}, {max_value}), '
+                            numr_exists = True
+                    
                     cur.execute(attr_stmt[:-2])
+                    if catg_exists:
+                        cur.execute(catg_attr_stmt[:-2])
+                    if numr_exists:
+                        cur.execute(numr_attr_stmt[:-2])
 
                     conn.commit()
                     msg = f'{table_name} 테이블 생성 성공'
