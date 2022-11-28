@@ -142,9 +142,3 @@ def scan_table(table_name):
         repr_attr=reprattr,
         join_key=joinkey
     )
-
-
-# @bp.route('/add', methodS=['POST'])
-# def result():
-#     result = request.form
-#     return result
