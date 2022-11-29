@@ -64,7 +64,7 @@ def upload():
     if 'database' in session:
         if request.method == 'POST':
             file = request.files['csv']
-            df = pd.read_csv(file)
+            df = pd.read_csv(file, encoding='cp949') # 한글 입력시 오류 생겨서 encoding 처리했습니다.
             
             conn = db.get_db()
             with conn:
