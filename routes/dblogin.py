@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
 import pymysql
 import pandas as pd
-import db
+import db   
 
 
 bp = Blueprint('dblogin', __name__, url_prefix='/dblogin', template_folder='templates')
