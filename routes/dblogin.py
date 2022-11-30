@@ -4,11 +4,14 @@ import pandas as pd
 import db   
 
 
-bp = Blueprint('dblogin', __name__, url_prefix='/dblogin', template_folder='templates')
+bp = Blueprint('dblogin', __name__, url_prefix='/dblogin',
+               template_folder='templates')
 
 # ===================================================
 # DB 접속
 # ===================================================
+
+
 @bp.route('/', methods=['GET', 'POST'])
 def dblogin():
     """
@@ -28,23 +31,23 @@ def dblogin():
                 for key in DB:
                     session[key] = DB[key]
                 return render_template(
-                        'dblogin.html',
-                        host=session['host'],
-                        port=session['port'],
-                        database=session['database'],
-                        user=session['user'],
-                        msg='DB 연결 성공')
+                    'dblogin.html',
+                    host=session['host'],
+                    port=session['port'],
+                    database=session['database'],
+                    user=session['user'],
+                    msg='DB 연결 성공')
             except pymysql.Error:
                 return render_template("dblogin.html", msg='DB 연결 실패')
         else:
             return render_template("dblogin.html")
     else:
         return render_template(
-                'dblogin.html',
-                host=session['host'],
-                port=session['port'],
-                database=session['database'],
-                user=session['user'])
+            'dblogin.html',
+            host=session['host'],
+            port=session['port'],
+            database=session['database'],
+            user=session['user'])
 
 
 # ===================================================
@@ -58,14 +61,15 @@ def upload():
     2) DB 연결 O: 
         - GET: upload.html 표시
         - POST: 첨부된 csv 파일을 읽고 DB에 테이블 생성
-        
+
     * DB 연결은 db.py의 get_db() 사용
     """
     if 'database' in session:
         if request.method == 'POST':
             file = request.files['csv']
-            df = pd.read_csv(file, encoding='cp949') # 한글 입력시 오류 생겨서 encoding 처리했습니다.
-            
+            # 한글 입력시 오류 생겨서 encoding 처리했습니다.
+            df = pd.read_csv(file, encoding='utf-8')
+
             conn = db.get_db()
             with conn:
                 cur = conn.cursor()
@@ -94,7 +98,8 @@ def upload():
                     for row in df.index:
                         stmt = ''
                         for col in df.columns:
-                            data = df[col][row] if not pd.isnull(df[col][row]) else 'NULL'
+                            data = df[col][row] if not pd.isnull(
+                                df[col][row]) else 'NULL'
                             stmt += f"'{data}', " if df[col].dtype == object and data != 'NULL' else f"{data}, "
                         insert_stmt = f'INSERT INTO `{table_name}` VALUES ({stmt[:-2]})'
                         cur.execute(insert_stmt)
@@ -115,11 +120,13 @@ def upload():
                     for col in df.columns:
                         dtype, is_numeric = ('VARCHAR', 'F') if df[col].dtype == object \
                             else (('DOUBLE', 'T') if df[col].dtype == float else ('INT', 'T'))
-                        
-                        cur.execute(f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` is NULL')
+
+                        cur.execute(
+                            f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` is NULL')
                         null_count = cur.fetchone()[0]
 
-                        cur.execute(f'SELECT COUNT(DISTINCT `{col}`) FROM {table_name}')
+                        cur.execute(
+                            f'SELECT COUNT(DISTINCT `{col}`) FROM {table_name}')
                         distinct_count = cur.fetchone()[0]
 
                         is_candidate = 'T' if distinct_count / record_count > 0.9 else 'F'
@@ -135,21 +142,24 @@ def upload():
                                     symbol_count += 1
                             catg_attr_stmt += f'("{table_name}", "{col}", {symbol_count}), '
                             catg_exists = True
-                            
+
                         # 수치속성 -> NUMERICAL_ATTR
                         else:
-                            cur.execute(f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` = 0')
+                            cur.execute(
+                                f'SELECT COUNT(*) FROM {table_name} WHERE `{col}` = 0')
                             zero_count = cur.fetchone()[0]
 
-                            cur.execute(f'SELECT MAX(`{col}`) FROM {table_name}')
+                            cur.execute(
+                                f'SELECT MAX(`{col}`) FROM {table_name}')
                             max_value = cur.fetchone()[0]
 
-                            cur.execute(f'SELECT MIN(`{col}`) FROM {table_name}')
+                            cur.execute(
+                                f'SELECT MIN(`{col}`) FROM {table_name}')
                             min_value = cur.fetchone()[0]
 
                             numr_attr_stmt += f'("{table_name}", "{col}", {zero_count}, {min_value}, {max_value}), '
                             numr_exists = True
-                    
+
                     cur.execute(attr_stmt[:-2])
                     if catg_exists:
                         cur.execute(catg_attr_stmt[:-2])

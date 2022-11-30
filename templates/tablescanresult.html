@@ -8,13 +8,20 @@
 
         .container {
             margin-left: 15%;
+            padding-bottom: 60px;
         }
 
-        .result1 {
+        .result {
             padding: 0 20px;
             display: flex;
             flex-direction: column;
-            /* justify-content: center; */
+        }
+
+        #boxplot {
+            border: 1px solid black;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 30px;
         }
 
         table {
@@ -48,8 +55,10 @@
 
     <h1 class="title">{{table_name}} 속성 도메인 스캔</h1>
     <div class="container"> 
-        <div class="result1">
+        <div class="result">
             <h3>수치 속성 스캔 결과</h3>
+            <div id="boxplot">
+            </div>
             <table style="border:1px solid black">
                 <thead>
                     <tr>
@@ -72,7 +81,7 @@
             </table>
             <button>수치 속성 스캔 결과 내려받기</button>
         </div>
-        <div class="result1">
+        <div class="result">
             <h3>범주 속성 스캔 결과</h3>
             <table style="border:1px solid black">
                 <thead>
@@ -96,8 +105,12 @@
         </div>     
     </div>
 
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
 
     <script>
+
+        document.querySelector('.w3-container').style.display = 'none';
+
         /* 총 레코드 수 */
         let total_record = parseInt('{{total_record}}')
 
@@ -173,6 +186,7 @@
         symbolcount = symbolcount.replace("]","")
         symbolcount = symbolcount.split(',')
 
+
         /* 투플 생성 */
         const CreateTuple = (num) => {
             let numeric_tr = ""
@@ -226,6 +240,50 @@
         CreateTuple(total_record)
 
 
+        /* BOXPLOT 생성 */
+
+        var reg = /[^0-9]/g;
+        var reg1 = /[\\(\\)]/g
+        
+        let numeric_attr = '{{numeric_attr}}';
+        numeric_attr = numeric_attr.split(',');
+
+        let numeric_attr_data = '{{numeric_attr_data}}'
+        numeric_attr_data = numeric_attr_data.replace(/&#39;/g,"")
+        numeric_attr_data = numeric_attr_data.replace(reg1,"")
+        numeric_attr_data = numeric_attr_data.replaceAll(" ","")
+        numeric_attr_data = numeric_attr_data.split(',')
+
+        let data = []
+        for (let i=1; i<=numeric_attr.length; i++) {
+            window[numeric_attr[i-1]] =[];
+            for (let j=i; j<=numeric_attr_data.length; j+=numeric_attr.length) {
+                window[numeric_attr[i-1]].push(parseInt(numeric_attr_data[j-1]));
+            }
+
+            window['trace'+i] = {
+                y:window[numeric_attr[i-1]],
+                type: 'box',
+                name: numeric_attr[i-1],
+                showlegend: false,
+            }
+
+            data.push(window['trace'+i])
+        }
+
+        var layout = {
+            width: 290,
+            height: 290,
+            margin: {
+                l:30,
+                r:30,
+                t:30,
+                b:30
+            }
+        }
+
+        Plotly.newPlot('boxplot',data,layout, {scrollZoom:true})
+
 
         /* 대표속성 */
         let attr_name_RA = '{{attr_name_RA}}'
@@ -261,7 +319,6 @@
         attr_name_JK = attr_name_JK.replace("]","")
         attr_name_JK = attr_name_JK.replace(/(\s*)/g,"")
         attr_name_JK = attr_name_JK.split(',')
-        console.log(attr_name_JK)
 
         let join_key = '{{join_key}}'
         join_key = join_key.replace(/&#39;/g,"")
@@ -269,7 +326,6 @@
         join_key = join_key.replace("]","")
         join_key = join_key.replace(/(\s*)/g,"")
         join_key = join_key.split(',')
-        console.log(join_key)
         
         for (let i=0; i<total_record;i++) {
             if (attr_name_JK.includes(attr[i])) {
