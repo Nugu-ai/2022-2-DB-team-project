@@ -1,40 +1,82 @@
 {% extends "index.html"  %}
 {% block content %}
-    <h1 style="margin-left:20%">테이블 속성 도메인 스캔</h1>
-    <div style="margin-left:20%">
-        <p>대상 테이블 선택</p>
-        <table style="border:1px solid black">
+    <style>
+        table {
+            border-collapse: collapse;
+            text-align: center;
+            border: 1px solid black
+        }
+        thead {
+            background-color: #bbdefb;
+        }
+        th {
+            border: 1px solid black;
+        }
+        td {
+            border: 1px solid black;
+        }
+        button {
+            margin-top: 20px;
+            width: 100px;
+        }
+    </style>
+    <h1 style="margin-left:15%; padding: 0 20px">테이블 속성 도메인 스캔</h1>
+    <div style="margin-left:15%; padding: 0 20px">
+        <h3>대상 테이블 선택</h3>
+        <table>
             <thead>
                 <tr>
-                    <th style="border: 1px solid black">테이블 명</th>
-                    <th style="border: 1px solid black">레코드 수</th>
-                    <th style="border: 1px solid black">속성</th>
+                    <th>테이블 명</th>
+                    <th>레코드 수</th>
+                    <th>속성</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for row in result %}
-                <tr onclick="select(id)" id="{{ row['table_name'] }}">
-                    <td style="border: 1px solid black">{{ row["table_name"] }}</td>
-                    <td style="border: 1px solid black">{{ row["records"] }}</td>
-                    <td style="border: 1px solid black">{{ row["attrs"] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="tbody"></tbody>
         </table>
         <button onclick="redirectTo()">다음</button>
     </div>
     <script>
         let selectedElement;
 
-        function select(id) {
-            if (selectedElement) document.getElementById(selectedElement).style.backgroundColor = 'white';
-            selectedElement = id;
-            document.getElementById(selectedElement).style.backgroundColor = '#009688';
-        }
+        fetch('/searchtable?scan=F')
+        .then((res) => res.json())
+        .then((data) => {
+            let tbody = document.getElementById('tbody');
+
+            let tr, tname, records, attrs;
+            for (const table of data) {
+                tr = document.createElement('tr');
+                tr.id = table["table_name"]
+                tr.onclick = () => {
+                    if (selectedElement) document.getElementById(selectedElement).style.backgroundColor = 'white';
+                    selectedElement = table["table_name"];
+                    document.getElementById(selectedElement).style.backgroundColor = 'lightgray';
+                }
+
+                tname = document.createElement('td');
+                tname.innerHTML = table["table_name"];
+
+                records = document.createElement('td');
+                records.innerHTML = table["records"];
+
+                attrs = document.createElement('td');
+                attrs.innerHTML = '';
+                for (const attr of table["attrs"]) {
+                    attrs.innerHTML += attr + ', ';
+                }
+                attrs.innerHTML = attrs.innerHTML.slice(0, -2);
+
+                tr.appendChild(tname);
+                tr.appendChild(records);
+                tr.appendChild(attrs);
+
+                tbody.appendChild(tr);
+            }
+        });
         
         function redirectTo() {
-            console.log(selectedElement);
-            window.location.href = '/tablescan/' + selectedElement;
+            if (selectedElement) window.location.href = '/tablescan/' + selectedElement;
+            else alert('선택된 테이블이 없습니다');
         }
     </script>
 {% endblock %}

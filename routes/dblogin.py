@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 import pymysql
 import pandas as pd
 import db   
@@ -10,8 +10,6 @@ bp = Blueprint('dblogin', __name__, url_prefix='/dblogin',
 # ===================================================
 # DB 접속
 # ===================================================
-
-
 @bp.route('/', methods=['GET', 'POST'])
 def dblogin():
     """
@@ -91,7 +89,7 @@ def upload():
                         elif df[col].dtype == float:
                             col_stmt += f'`{col}` DOUBLE, '
                         else:
-                            col_stmt += f'`{col}` VARCHAR(100), '
+                            col_stmt += f'`{col}` TEXT COLLATE utf8_bin, ' # 테스트 데이터 참고하여 VARCHAR(100) -> TEXT (utf-8)로 변경하였습니다
                     create_stmt = f'CREATE TABLE IF NOT EXISTS `{table_name}` ({col_stmt[:-2]})'
                     cur.execute(create_stmt)
 
@@ -118,7 +116,7 @@ def upload():
                     numr_attr_stmt = 'INSERT INTO `NUMERIC_ATTR` VALUES '
                     numr_exists = False
                     for col in df.columns:
-                        dtype, is_numeric = ('VARCHAR', 'F') if df[col].dtype == object \
+                        dtype, is_numeric = ('TEXT', 'F') if df[col].dtype == object \
                             else (('DOUBLE', 'T') if df[col].dtype == float else ('INT', 'T'))
 
                         cur.execute(
@@ -134,7 +132,7 @@ def upload():
                         attr_stmt += f'("{table_name}", "{col}", "{dtype}", {null_count}, {record_count}, {distinct_count}, "{is_candidate}", "{is_numeric}"), '
 
                         # 범주속성 -> CATEGORICAL_ATTR
-                        if dtype == 'VARCHAR':
+                        if dtype == 'TEXT':
                             cur.execute(f'SELECT `{col}` FROM {table_name}')
                             symbol_count = 0
                             for data in cur.fetchall():
@@ -172,18 +170,9 @@ def upload():
                 else:
                     msg = f'동일한 이름의 테이블이 존재합니다: {table_name}'
 
-            return render_template(
-                'upload.html',
-                host=session['host'],
-                port=session['port'],
-                database=session['database'],
-                msg=msg)
+            return render_template('upload.html', msg=msg)
         else:
-            return render_template(
-                'upload.html',
-                host=session['host'],
-                port=session['port'],
-                database=session['database'])
+            return render_template('upload.html')
     else:
         return redirect(url_for('dblogin.dblogin'))
 
@@ -204,3 +193,22 @@ def disconnect():
         session.pop('password', None)
 
     return redirect(url_for('dblogin.dblogin'))
+
+
+# ===================================================
+# DB 접속정보
+# ===================================================
+@bp.route('/status', methods=['GET'])
+def status():
+    db_status = {
+        "host": "-",
+        "port": "-",
+        "database": "-"
+    }
+    if 'database' in session:
+        db_status['host'] = session['host']
+        db_status['port'] = session['port']
+        db_status['database'] = session['database']
+        return jsonify(db_status)
+    else:
+        return jsonify(db_status)

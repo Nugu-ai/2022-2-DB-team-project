@@ -1,11 +1,41 @@
 {% extends "index.html"  %}
 {% block content %}
-    <h1 style="margin-left:20%">DB 연결관리</h1>
-    <div style="margin-left:20%">
+    <style>
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .login-form input {
+            width: 300px;
+            height: 30px;
+            border: 1px solid black;
+            margin-top: 10px
+        }
+        #connect {
+            width: 300px;
+            height: 30px;
+            background-color: #009688;
+            border: none;
+            color: white;
+        }
+        #disconnect {
+            width: 300px;
+            height: 30px;
+            margin-top: 10px;
+        }
+        button {
+            width: 150px;
+            height: 30px;
+        }
+    </style>
+    <h1 style="margin-left:15%; padding: 0 20px">DB 연결관리</h1>
+    <div style="margin-left:15%; padding: 0 20px">
         <button>DB 연결</button>
         <button onclick="checkConnection()">CSV 업로드</button>
         <form method="post" action="/dblogin">
-            <div>
+            <div class="login-form">
                 <label for="host">HOST: </label>
                 <input type="text" name="host" id="host" autofocus required>
                 <br>
@@ -27,12 +57,12 @@
             </div>
             <div>
                 <input type="submit" value="Connect" id="connect">
-                <p style="color:red">{{ msg }}</p>
             </div>
         </form>
         <form method="post" action="/dblogin/disconnect">
             <input type="submit" value="Disconnect" id="disconnect">
         </form>
+        <p style="color:red">{{ msg }}</p>
     </div>
     <script>
         function checkConnection() {

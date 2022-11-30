@@ -11,7 +11,7 @@
     <!-- Sidebar -->
     <div class="w3-sidebar w3-light-grey w3-bar-block" style="width:15%">
     <h6 class="w3-bar-item">
-        <div class="w3-container w3-gray">DB 연결정보 <br> HOST: {{ host }}<br> PORT: {{ port }}<br> Database: {{ database }}</div>
+        <div class="w3-container w3-gray" id="status">DB 연결정보 <br> HOST: <br> PORT: <br> Database: </div>
     </h5>
         <a href="/dblogin" class="w3-bar-item w3-button">DB 연결 관리</a>
         <a href="/tablescan" class="w3-bar-item w3-button">테이블 속성 도메인 스캔</a>
@@ -35,5 +35,16 @@
   
     </div>
     {% block content %}{% endblock %}
+    <script>
+        let host, port, database;
+
+        fetch('/dblogin/status')
+        .then((res) => res.json())
+        .then((data) => { document.getElementById('status').innerHTML = `DB 연결정보 <br> \
+                                                            HOST: ${data['host']}<br> \
+                                                            PORT: ${data['port']}<br> \
+                                                            Database: ${data['database']}`; })
+        .catch((err) => console.log(`Internal server problem: ${err.message}`))
+    </script>
 </body>
 </html>
