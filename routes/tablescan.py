@@ -122,6 +122,18 @@ def scan_table(table_name):
             attrname_JK.append(attr_name)
             joinkey.append(key_name)
 
+        # boxplot
+        numeric_attr = ""
+        cur.execute(
+            'SELECT attr_name FROM attr WHERE is_numeric = "T" AND table_name = %s', [tabledname])
+        for attr_name in cur.fetchall():
+            numeric_attr += str(attr_name[0]) + ','
+
+        numeric_attr = numeric_attr.rstrip(',')
+
+        cur.execute(f'SELECT {numeric_attr} FROM {tabledname}')
+        numeric_attr_data = cur.fetchall()
+
     return render_template(
         'tablescanresult.html',
         table_name=tabledname,
@@ -140,5 +152,7 @@ def scan_table(table_name):
         attr_name_RA=attrname_RA,
         attr_name_JK=attrname_JK,
         repr_attr=reprattr,
-        join_key=joinkey
+        join_key=joinkey,
+        numeric_attr=numeric_attr,
+        numeric_attr_data=numeric_attr_data
     )
