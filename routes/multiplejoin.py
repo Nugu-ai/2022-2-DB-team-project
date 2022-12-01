@@ -5,4 +5,4 @@ bp = Blueprint('multiplejoin', __name__, url_prefix='/multiplejoin', template_fo
 
 @bp.route('/')
 def multiplejoin():
-    return render_template("multiplejoin.html")
+    return render_template("multiplejoin_source.html")
