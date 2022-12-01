@@ -24,6 +24,7 @@ def searchtable():
             - tname: 테이블 명
             - jkey: 대표 결합키 이름
             - rattr: 대표 속성 이름
+            - attr: 속성명          -> 결합 시 테이블 검색에 사용하기 위해 추가했습니다. 2022.12.01
             - scan: 스캔 완료 여부
 
         - ex: GET '/localhost:5000/searchtable?scan=F&tname=1_Fitness_Measurement'
@@ -47,6 +48,7 @@ def searchtable():
     if 'database' in session:
         table_name = request.args.get('tname', '')
         repr_attr_name = request.args.get('rattr', '')
+        attr_name = request.args.get('attr', '') #변경
         join_key = request.args.get('jkey', '')
         is_scanned = request.args.get('scan', 'T') if request.args.get('scan', '') in ("T", "F") else ''
 
@@ -63,6 +65,11 @@ def searchtable():
                                         (SELECT `r`.`table_name` FROM REPR_ATTR AS `r` \
                                         JOIN STD_REPR_ATTR AS `s` ON `r`.`repr_attr_id` = `s`.`repr_attr_id` \
                                         WHERE `s`.`repr_attr_name` = "{repr_attr_name}")'
+
+            if attr_name: #변경
+                table_list_stmt += f' AND `t`.`table_name` IN\
+                                        (SELECT `a`.`table_name` FROM ATTR AS `a`\
+                                        WHERE `a`.`attr_name` = "{attr_name}")'
 
             if join_key:
                 table_list_stmt += f' AND `t`.`table_name` IN \

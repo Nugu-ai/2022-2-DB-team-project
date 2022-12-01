@@ -1,0 +1,69 @@
+{% extends "index.html"  %}
+{% block content %}
+<style>
+    .title {
+        margin-left: 15%;
+        padding: 0 20px;
+    }
+
+    .container {
+        margin-left: 15%;
+        padding: 0 20px;
+        padding-bottom: 60px;
+    }
+
+    table {
+        border-collapse: collapse;
+        font-size: 14.5px;
+        text-align: center;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    thead {
+        background: #bbdefb;
+    }
+    th {
+        border: 1px solid black;
+    }
+
+    td {
+        border: 1px solid black;
+    }
+
+</style>
+<h1 class="title">단일 결합</h1>
+<h3 class="title">Target 테이블 검색</h3>
+<h5 class="title">현재 선택된 Source 테이블</h5>
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>테이블 명</th>
+                <th>레코드 수</th>
+                <th>대표 속성</th>
+                <th>대표 결합키</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+<h5 class="title">Source 테이블과 결합 가능한 테이블 목록</h5>
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>테이블 명</th>
+                <th>레코드 수</th>
+                <th>대표 속성</th>
+                <th>대표 결합키</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+    <button onclick="redirectTo()">다음</button>
+</div>
+<script>
+    
+</script>
+{% endblock %}
