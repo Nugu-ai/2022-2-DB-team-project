@@ -87,9 +87,7 @@
             <tbody class="n_tbody">
             </tbody>
         </table>
-        
             <button class="savebutton" type="submit">변경사항 저장</button>
-       
     </div>
     <div class="result">
         <h3>범주 속성 스캔 결과</h3>
@@ -211,13 +209,12 @@
         
         for (let i=0; i<num; i++) {
             if (isnumeric[i] == 'T') {
-                let asdf = attr[i]
                 numeric_tr += `
                 <tr>
                     <td>`+attr[i]+`</td>
                     <td>`+datype[i]+`</td>
                     <td> 
-                        <input type="checkbox" id="Ncheck" name="Ncheck" class="Ncheck" value="`+ asdf +`">
+                        <input type="checkbox" id="Ncheck" name="Ncheck" class="Ncheck" value="`+ attr[i] +`">
                     </td>
                     <td>`+nullcount[i]+`</td>
                     <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
