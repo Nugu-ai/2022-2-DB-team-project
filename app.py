@@ -58,7 +58,7 @@ def searchtable():
             table_list_stmt = f'SELECT `t`.`table_name` FROM TABLE_LIST AS `t` WHERE `t`.`is_scanned` = "{is_scanned}"'
 
             if table_name:
-                table_list_stmt += f' AND `t`.`table_name` = "{table_name}"'
+                table_list_stmt += f' AND `t`.`table_name` LIKE "%{table_name}%"'
 
             if repr_attr_name:
                 table_list_stmt += f' AND `t`.`table_name` IN \
@@ -69,7 +69,7 @@ def searchtable():
             if attr_name: #변경
                 table_list_stmt += f' AND `t`.`table_name` IN\
                                         (SELECT `a`.`table_name` FROM ATTR AS `a`\
-                                        WHERE `a`.`attr_name` = "{attr_name}")'
+                                        WHERE `a`.`attr_name` LIKE "%{attr_name}%")'
 
             if join_key:
                 table_list_stmt += f' AND `t`.`table_name` IN \
@@ -115,6 +115,71 @@ def searchtable():
                 all_table_list.append(
                     {"table_name": table_name[0], "attrs": attrs, "records": records, "repr_attrs": repr_attrs, "join_keys": join_keys})
         return jsonify(all_table_list)
+    else:
+        return Response(status=401, mimetype='application/json')
+
+
+# ===================================================
+# 대표 속성 목록 API
+# ===================================================
+@app.route('/stdattr')
+def stdattr():
+    """
+    REQUEST URL: '/stdattr'
+        - Method: GET
+        - Parameters:
+            - None
+
+    RESPONSE: application/json
+        [
+            "학업정보",
+            "금융정보",
+            "회원정보",
+            "건강정보"
+        ]
+    """
+    if 'database' in session:
+        conn = db.get_db()
+        with conn:
+            cur = conn.cursor()
+            cur.execute('SELECT `repr_attr_name` FROM `STD_REPR_ATTR`')
+            result = []
+            for attr in cur.fetchall():
+                result.append(attr[0])
+            return jsonify(result)
+    else:
+        return Response(status=401, mimetype='application/json')
+
+
+# ===================================================
+# 대표 결합키 목록 API
+# ===================================================
+@app.route('/stdkey')
+def stdkey():
+    """
+    REQUEST URL: '/stdkey'
+        - Method: GET
+        - Parameters:
+            - None
+
+    RESPONSE: application/json
+        [
+            "주민등록번호",
+            "전화번호",
+            "차량번호",
+            "이메일",
+            "IP"
+        ]
+    """
+    if 'database' in session:
+        conn = db.get_db()
+        with conn:
+            cur = conn.cursor()
+            cur.execute('SELECT `key_name` FROM `STD_JOIN_KEY`')
+            result = []
+            for key_name in cur.fetchall():
+                result.append(key_name[0])
+            return jsonify(result)
     else:
         return Response(status=401, mimetype='application/json')
 
