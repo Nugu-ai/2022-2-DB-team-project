@@ -87,7 +87,6 @@
             <tbody class="n_tbody">
             </tbody>
         </table>
-            <button class="savebutton" type="submit">변경사항 저장</button>
     </div>
     <div class="result">
         <h3>범주 속성 스캔 결과</h3>
@@ -214,7 +213,7 @@
                     <td>`+attr[i]+`</td>
                     <td>`+datype[i]+`</td>
                     <td> 
-                        <input type="checkbox" id="Ncheck" name="Ncheck" class="Ncheck" value="`+ attr[i] +`">
+                        <input type="checkbox" id="Ncheck" name="check" class="Ncheck" value="`+ attr[i] +`">
                     </td>
                     <td>`+nullcount[i]+`</td>
                     <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
@@ -239,7 +238,7 @@
                         <td>`+attr[i]+`</td>
                         <td>`+datype[i]+`</td>
                         <td>
-                            <input type="checkbox" id="Ccheck" name="Ccheck" class="Ccheck" value="` + attr[i] + `">
+                            <input type="checkbox" id="Ccheck" name="check" class="Ccheck" value="` + attr[i] + `">
                         </td>
                         <td>`+nullcount[i]+`</td>
                         <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
