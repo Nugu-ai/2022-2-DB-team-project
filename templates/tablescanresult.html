@@ -79,7 +79,7 @@
                 <tbody class="n_tbody">
                 </tbody>
             </table>
-            <button>수치 속성 스캔 결과 내려받기</button>
+            <button onClick="NumericDownloadCSV()">수치 속성 스캔 결과 내려받기</button>
         </div>
         <div class="result">
             <h3>범주 속성 스캔 결과</h3>
@@ -101,7 +101,7 @@
                 <tbody class="c_tbody">
                 </tbody>
             </table>
-            <button>범주 속성 스캔 결과 내려받기</button>
+            <button onClick="CategoricDownloadCSV()">범주 속성 스캔 결과 내려받기</button>
         </div>     
     </div>
 
@@ -336,6 +336,58 @@
                 /* 대표결합키 없는 속성 */
                 document.querySelector('.JK-'+i).innerHTML = '-'
             }
+        }
+
+        let tablename = '{{table_name}}'
+
+        function NumericDownloadCSV() {
+            
+            var a = "";
+            a += "속성명, 데이터 타입, NULL 레코드 수, NULL 레코드 비율, 상이 수치 값, 최대 값, 최소 값, 0 레코드 수, 0 레코드 비율, 대표 속성, 결합키 후보, 대표 결합키 \r\n"
+            let count = 0;
+            for (let j=0; j < attr.length; j++) {
+                if (isnumeric[j] == 'T') {
+                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + maxv[count] + ',' + minv[count] + ',' + zerocount[count] + ',' + (parseInt(zerocount[count])/parseInt(recordcount[j])) + ',' + ' ' + ',' + candidate[j] + ',' + ' ' +  '\r\n';
+                    count += 1;
+                }
+            }
+            
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff"+a], { type: "text/csv;charset=utf-8"});
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = tablename + "수치 속성 스캔 결과.csv";
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            
+        }
+
+        function CategoricDownloadCSV() {
+
+            var a = "";
+            a += "속성명, 데이터 타입, NULL 레코드 수, NULL 레코드 비율, 상이 범주 값, 특수문자 포함 레코드 수, 특수문자 포함 레코드 비율, 대표 속성, 결합키 후보, 대표 결합키 \r\n"
+            let count = 0;
+            for (let j=0; j < attr.length; j++) {
+                if (isnumeric[j] == 'F') {
+                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + symbolcount[count] + ',' + (parseInt(symbolcount[count])/parseInt(recordcount[j])) + ',' + ' ' + ',' + candidate[j] + ',' + ' ' +  '\r\n';
+                    count += 1;
+                }
+            }
+            
+            var downloadLink = document.createElement("a");
+            var blob = new Blob(["\ufeff"+a], { type: "text/csv;charset=utf-8"});
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = tablename + "범주 속성 스캔 결과.csv";
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            
         }
         
     </script>
