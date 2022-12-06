@@ -51,6 +51,10 @@
             cursor: pointer;
         }
 
+        select {
+            text-align: center;
+        }
+
         .RA select {
             width: 100%;
             border: none;
@@ -216,7 +220,7 @@
         symbolcount = symbolcount.split(',')
 
 
-        /* 투플 생성 */
+        /* 튜플 생성 */
         const CreateTuple = (num) => {
             let numeric_tr = ""
             let categoric_tr = ""
@@ -322,23 +326,14 @@
         attr_name_RA = attr_name_RA.replace(/(\s*)/g,"")
         attr_name_RA = attr_name_RA.split(',')
 
+
         let repr_attr = '{{repr_attr}}'
         repr_attr = repr_attr.replace(/&#39;/g,"")
         repr_attr = repr_attr.replace("[","")
         repr_attr = repr_attr.replace("]","")
         repr_attr = repr_attr.replace(/(\s*)/g,"")
         repr_attr = repr_attr.split(',')
-        
-        // for (let i=0; i<total_record;i++) {
-        //     if (attr_name_RA.includes(attr[i])) {
-        //         /* 대표속성 있는 속성 */
-        //         let n = attr_name_RA.indexOf(attr[i])
-        //         document.querySelector('.RA-'+i).innerHTML = repr_attr[n]
-        //     } else {
-        //         /* 대표속성 없는 속성 */
-        //         document.querySelector('.RA-'+i).innerHTML = '-'
-        //     }
-        // }
+
 
         let RAList = document.querySelectorAll('.RA');
         (async () => {
@@ -385,6 +380,7 @@
         attr_name_JK = attr_name_JK.replace(/(\s*)/g,"")
         attr_name_JK = attr_name_JK.split(',')
 
+
         let join_key = '{{join_key}}'
         join_key = join_key.replace(/&#39;/g,"")
         join_key = join_key.replace("[","")
@@ -392,16 +388,6 @@
         join_key = join_key.replace(/(\s*)/g,"")
         join_key = join_key.split(',')
         
-        // for (let i=0; i<total_record;i++) {
-        //     if (attr_name_JK.includes(attr[i])) {
-        //         /* 대표결합키 있는 속성 */
-        //         let n = attr_name_JK.indexOf(attr[i])
-        //         document.querySelector('.JK-'+i).innerHTML = join_key[n]
-        //     } else {
-        //         /* 대표결합키 없는 속성 */
-        //         document.querySelector('.JK-'+i).innerHTML = '-'
-        //     }
-        // }
 
         let JKList = document.querySelectorAll('.JK');
         (async () => {
@@ -444,6 +430,8 @@
 
         let tablename = '{{table_name}}'
 
+
+        /* CSV파일 내려받기 */
         function NumericDownloadCSV() {
             
             var a = "";
@@ -451,7 +439,28 @@
             let count = 0;
             for (let j=0; j < attr.length; j++) {
                 if (isnumeric[j] == 'T') {
-                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + maxv[count] + ',' + minv[count] + ',' + zerocount[count] + ',' + (parseInt(zerocount[count])/parseInt(recordcount[j])) + ',' + ' ' + ',' + candidate[j] + ',' + ' ' +  '\r\n';
+
+                    /* 대표속성_csv */
+                    let repr_attr_csv
+
+                    if (attr_name_RA.includes(attr[j])) {
+                        let n = attr_name_RA.indexOf(attr[j])
+                        repr_attr_csv = repr_attr[n] 
+                    } else {
+                        repr_attr_csv = ''
+                    }
+
+                    /* 대표결합키_csv */
+                    let join_key_csv
+
+                    if (attr_name_JK.includes(attr[j])) {
+                        let m = attr_name_JK.indexOf(attr[j])
+                        join_key_csv = join_key[m]
+                    } else {
+                        join_key_csv = ''
+                    }
+
+                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + maxv[count] + ',' + minv[count] + ',' + zerocount[count] + ',' + (parseInt(zerocount[count])/parseInt(recordcount[j])) + ',' + repr_attr_csv + ',' + candidate[j] + ',' + join_key_csv +  '\r\n';
                     count += 1;
                 }
             }
@@ -476,7 +485,28 @@
             let count = 0;
             for (let j=0; j < attr.length; j++) {
                 if (isnumeric[j] == 'F') {
-                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + symbolcount[count] + ',' + (parseInt(symbolcount[count])/parseInt(recordcount[j])) + ',' + ' ' + ',' + candidate[j] + ',' + ' ' +  '\r\n';
+
+                    /* 대표속성_csv */
+                    let repr_attr_csv
+
+                    if (attr_name_RA.includes(attr[j])) {
+                        let n = attr_name_RA.indexOf(attr[j])
+                        repr_attr_csv = repr_attr[n] 
+                    } else {
+                        repr_attr_csv = ''
+                    }
+
+                    /* 대표결합키_csv */
+                    let join_key_csv
+
+                    if (attr_name_JK.includes(attr[j])) {
+                        let m = attr_name_JK.indexOf(attr[j])
+                        join_key_csv = join_key[m]
+                    } else {
+                        join_key_csv = ''
+                    }
+
+                    a += attr[j] + ',' + datype[j] + ',' + parseInt(nullcount[j]) + ',' + (parseInt(nullcount[count])/parseInt(recordcount[j])) + ',' + dist[j] + ',' + symbolcount[count] + ',' + (parseInt(symbolcount[count])/parseInt(recordcount[j])) + ',' + repr_attr_csv + ',' + candidate[j] + ',' + join_key_csv +  '\r\n';
                     count += 1;
                 }
             }
