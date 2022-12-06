@@ -66,7 +66,11 @@ def upload():
         if request.method == 'POST':
             file = request.files['csv']
             # 한글 입력시 오류 생겨서 encoding 처리했습니다.
-            df = pd.read_csv(file, encoding='utf-8')
+            if file:
+                df = pd.read_csv(file, encoding='utf-8')
+            else:
+                msg = '선택된 파일이 없습니다'
+                return render_template('upload.html', msg=msg)
 
             conn = db.get_db()
             with conn:
@@ -77,8 +81,8 @@ def upload():
                 all_table_list_stmt = 'SELECT `table_name` FROM `TABLE_LIST`'
                 cur.execute(all_table_list_stmt)
                 all_table_list = []
-                for names in cur.fetchall():
-                    all_table_list.append(names[0])
+                for names, in cur.fetchall():
+                    all_table_list.append(names)
 
                 # 테이블 명 중복 체크
                 if table_name not in all_table_list:
@@ -135,8 +139,8 @@ def upload():
                         if dtype == 'TEXT':
                             cur.execute(f'SELECT `{col}` FROM {table_name}')
                             symbol_count = 0
-                            for data in cur.fetchall():
-                                if data[0] is not None and not data[0].isalnum():
+                            for data, in cur.fetchall():
+                                if data is not None and not data.isalnum():
                                     symbol_count += 1
                             catg_attr_stmt += f'("{table_name}", "{col}", {symbol_count}), '
                             catg_exists = True

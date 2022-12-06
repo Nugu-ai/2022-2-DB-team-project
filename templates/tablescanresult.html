@@ -51,6 +51,32 @@
             cursor: pointer;
         }
 
+        .RA select {
+            width: 100%;
+            border: none;
+        }
+
+        .RA select:focus {
+            outline: none;
+        }
+
+        .JK select {
+            width: 100%;
+            border: none;
+        }
+
+        .JK select:focus {
+            outline: none;
+        }
+
+        #save input {
+            width: 250px;
+            height: 30px;
+            background-color: #009688;
+            border: none;
+            color: white;
+            float: right;
+        }
     </style>
 
     <h1 class="title">{{table_name}} 속성 도메인 스캔</h1>
@@ -102,7 +128,10 @@
                 </tbody>
             </table>
             <button onClick="CategoricDownloadCSV()">범주 속성 스캔 결과 내려받기</button>
-        </div>     
+            <form action="/tablescan/{{ table_name }}" method="post" id="save">
+                <input type="submit" value="변경사항 저장">
+            </form>
+        </div>
     </div>
 
     <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
@@ -198,37 +227,37 @@
             for (let i=0; i<num; i++) {
                 if (isnumeric[i] == 'T') {
                     numeric_tr += `
-                    <tr>
-                        <td>`+attr[i]+`</td>
-                        <td>`+datype[i]+`</td>
-                        <td>`+nullcount[i]+`</td>
-                        <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
-                        <td>`+dist[i]+`</td>
-                        <td>`+maxv[numeric_count]+`</td>
-                        <td>`+minv[numeric_count]+`</td>
-                        <td>`+zerocount[numeric_count]+`</td>
-                        <td>`+(zerocount[numeric_count]/parseInt(recordcount[i]))+`</td>
-                        <td class='RA-`+i+`'></td>
-                        <td>`+candidate[i]+`</td>
-                        <td class='JK-`+i+`'></td>
+                    <tr id=${attr[i]}>
+                        <td>${attr[i]}</td>
+                        <td>${datype[i]}</td>
+                        <td>${nullcount[i]}</td>
+                        <td>${(parseInt(nullcount[i])/parseInt(recordcount[i]))}</td>
+                        <td>${dist[i]}</td>
+                        <td>${datype[i] === "INT" ? parseInt(maxv[numeric_count]) : maxv[numeric_count]}</td>
+                        <td>${datype[i] === "INT" ? parseInt(minv[numeric_count]) : minv[numeric_count]}</td>
+                        <td>${zerocount[numeric_count]}</td>
+                        <td>${(zerocount[numeric_count]/parseInt(recordcount[i]))}</td>
+                        <td class='RA'></td>
+                        <td>${candidate[i]}</td>
+                        <td class='JK'></td>
                     </tr>
-                    `
+                    ` // INT의 최대, 최소를 정수로 표시
                     document.querySelector('.n_tbody').innerHTML = numeric_tr;
                     numeric_count += 1;
                 }
                 else if (isnumeric[i] == 'F') {
                     categoric_tr += `
-                    <tr>
-                        <td>`+attr[i]+`</td>
-                        <td>`+datype[i]+`</td>
-                        <td>`+nullcount[i]+`</td>
-                        <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
-                        <td>`+dist[i]+`</td>
-                        <td>`+symbolcount[categoric_count]+`</td>
-                        <td>`+(symbolcount[categoric_count]/parseInt(recordcount[i]))+`</td>
-                        <td class='RA-`+i+`'></td>
-                        <td>`+candidate[i]+`</td>
-                        <td class='JK-`+i+`'></td>
+                    <tr id=${attr[i]}>
+                        <td>${attr[i]}</td>
+                        <td>${datype[i]}</td>
+                        <td>${nullcount[i]}</td>
+                        <td>${(parseInt(nullcount[i])/parseInt(recordcount[i]))}</td>
+                        <td>${dist[i]}</td>
+                        <td>${symbolcount[categoric_count]}</td>
+                        <td>${(symbolcount[categoric_count]/parseInt(recordcount[i]))}</td>
+                        <td class='RA'></td>
+                        <td>${candidate[i]}</td>
+                        <td class='JK'></td>
                     </tr>
                     `
                     document.querySelector('.c_tbody').innerHTML = categoric_tr;
@@ -300,16 +329,52 @@
         repr_attr = repr_attr.replace(/(\s*)/g,"")
         repr_attr = repr_attr.split(',')
         
-        for (let i=0; i<total_record;i++) {
-            if (attr_name_RA.includes(attr[i])) {
-                /* 대표속성 있는 속성 */
-                let n = attr_name_RA.indexOf(attr[i])
-                document.querySelector('.RA-'+i).innerHTML = repr_attr[n]
-            } else {
-                /* 대표속성 없는 속성 */
-                document.querySelector('.RA-'+i).innerHTML = '-'
+        // for (let i=0; i<total_record;i++) {
+        //     if (attr_name_RA.includes(attr[i])) {
+        //         /* 대표속성 있는 속성 */
+        //         let n = attr_name_RA.indexOf(attr[i])
+        //         document.querySelector('.RA-'+i).innerHTML = repr_attr[n]
+        //     } else {
+        //         /* 대표속성 없는 속성 */
+        //         document.querySelector('.RA-'+i).innerHTML = '-'
+        //     }
+        // }
+
+        let RAList = document.querySelectorAll('.RA');
+        (async () => {
+            let fetchedAttrList = await fetch('/stdattr').then((res) => res.json());
+
+            for (const node of RAList) {
+                let attributeName = node.parentNode.id;
+
+                let selectElement = document.createElement('select');
+                selectElement.setAttribute('name', attributeName + '_RA');
+                selectElement.setAttribute('form', 'save');
+
+                let defaultOption = document.createElement('option');
+                if (attr_name_RA.includes(attributeName)) {
+                    // 대표속성 있는 속성
+                    let n = attr_name_RA.indexOf(attributeName);
+                    defaultOption.innerHTML = repr_attr[n];
+                    selectElement.disabled = true;
+                } else {
+                    // 대표속성 없는 속성
+                    defaultOption.value = 'Null';
+                    defaultOption.innerHTML = '';
+                }
+                
+                selectElement.appendChild(defaultOption);
+
+                for (const stdattr of fetchedAttrList) {
+                    let optionElement = document.createElement('option');
+                    optionElement.value = stdattr;
+                    optionElement.innerHTML = stdattr;
+                    selectElement.appendChild(optionElement);
+                }
+
+                node.appendChild(selectElement);
             }
-        }
+        })();
 
 
         /* 대표결합키 */
@@ -327,16 +392,55 @@
         join_key = join_key.replace(/(\s*)/g,"")
         join_key = join_key.split(',')
         
-        for (let i=0; i<total_record;i++) {
-            if (attr_name_JK.includes(attr[i])) {
-                /* 대표결합키 있는 속성 */
-                let n = attr_name_JK.indexOf(attr[i])
-                document.querySelector('.JK-'+i).innerHTML = join_key[n]
-            } else {
-                /* 대표결합키 없는 속성 */
-                document.querySelector('.JK-'+i).innerHTML = '-'
+        // for (let i=0; i<total_record;i++) {
+        //     if (attr_name_JK.includes(attr[i])) {
+        //         /* 대표결합키 있는 속성 */
+        //         let n = attr_name_JK.indexOf(attr[i])
+        //         document.querySelector('.JK-'+i).innerHTML = join_key[n]
+        //     } else {
+        //         /* 대표결합키 없는 속성 */
+        //         document.querySelector('.JK-'+i).innerHTML = '-'
+        //     }
+        // }
+
+        let JKList = document.querySelectorAll('.JK');
+        (async () => {
+            let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
+
+            for (const node of JKList) {
+                let attributeName = node.parentNode.id;
+
+                let selectElement = document.createElement('select');
+                selectElement.setAttribute('name', attributeName + '_JK');
+                selectElement.setAttribute('form', 'save');
+
+                let defaultOption = document.createElement('option');
+                if (attr_name_JK.includes(attributeName)) {
+                    // 대표결합키 있는 속성
+                    let n = attr_name_JK.indexOf(attributeName);
+                    defaultOption.innerHTML = join_key[n];
+                    selectElement.disabled = true;
+                } else {
+                    // 대표결합키 없는 속성
+                    defaultOption.value = 'Null';
+                    defaultOption.innerHTML = '';
+                }
+
+                selectElement.appendChild(defaultOption);
+
+                for (const stdkey of fetchedKeyList) {
+                    let optionElement = document.createElement('option');
+                    optionElement.value = stdkey;
+                    optionElement.innerHTML = stdkey;
+                    selectElement.appendChild(optionElement);
+                }
+
+                // 결합키 후보가 아닐 경우 대표결합키 설정 불가능
+                if (iscandidate[attr.indexOf(attributeName)] === 'F') selectElement.disabled = true;
+
+                node.appendChild(selectElement);
             }
-        }
+        })();
 
         let tablename = '{{table_name}}'
 
