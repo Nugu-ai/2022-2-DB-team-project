@@ -45,7 +45,14 @@
                 <th>대표 결합키</th>
             </tr>
         </thead>
-        <tbody id="tbody"></tbody>
+        <tbody>
+            <tr>
+                <th>{{table_name}}</th>
+                <th>{{total_record}}</th>
+                <th>{{repr_attr}}</th>
+                <th id="jkey">{{join_key}}</th>
+            </tr>
+        </tbody>
     </table>
 </div>
 <h5 class="title">Source 테이블과 결합 가능한 테이블 목록</h5>
@@ -64,6 +71,78 @@
     <button onclick="redirectTo()">다음</button>
 </div>
 <script>
+    const jkeys = document.getElementById('jkey').innerHTML.split(', ')
+    let tbody = document.getElementById('tbody')
+    tbody.innerHTML = ''
+    let selectedElement;
+    let tr, tname, records, rattrs, rkeys;
+
+    for (const jkey of jkeys) {
+
+        var url = '/searchtable?scan=T&jkey=' + jkey
+        fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+            if (data == '') {
+                alert('타겟테이블이 없습니다!')
+            } else {
+                for (table of data) {
+                    
+                    tr = document.createElement('tr');
+                    tr.id = table["table_name"] + ',' + table["join_keys"]
+        
+                    
+                    tname = document.createElement('td');
+                    tname.innerHTML = table["table_name"];
+
+                    records = document.createElement('td');
+                    records.innerHTML = table["records"];
+
+                    rattrs = document.createElement('td');
+                    if (table["repr_attrs"].length > 1) {
+                        const uniqueTmp = {}
+                        table["repr_attrs"].forEach(element => {
+                            uniqueTmp[element] = true;
+                        });
+                        const unique = Object.keys(uniqueTmp)
+
+                        rattrs.innerHTML = '';
+                        for (const rattr of unique) {
+                            rattrs.innerHTML += rattr + ', ';
+                        }
+                        rattrs.innerHTML = rattrs.innerHTML.slice(0, -2);
+
+                    } else if(table["repr_attrs"].length == 1) {
+                        rattrs.innerHTML = table["repr_attrs"];
+
+                    } else {
+                            rattrs.innerHTML = '-'
+                    }
+
+                    rkeys = document.createElement('td');
+                    if (table["join_keys"].length > 1) {
+                        rkeys.innerHTML = '';
+                        for (const rkey of table["join_keys"]) {
+                            rkeys.innerHTML += rkey + ', ';
+                        }
+                        rkeys.innerHTML = rkeys.innerHTML.slice(0, -2);
+                    } else if(table["join_keys"].length == 1) {
+                        rkeys.innerHTML = table["join_keys"];
+                    } else {
+                        rkeys.innerHTML = '-'
+                    }
+
+                    tr.appendChild(tname);
+                    tr.appendChild(records);
+                    tr.appendChild(rattrs);
+                    tr.appendChild(rkeys)
+
+                    tbody.appendChild(tr);
+
+                }
+            }
+        })
+    }
     
 </script>
 {% endblock %}

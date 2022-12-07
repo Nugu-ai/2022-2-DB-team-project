@@ -1,4 +1,84 @@
-{% extends "index.html"  %}
+{% extends "index.html" %} 
 {% block content %}
-    <p style="margin-left:15%">결과조회입니다</p>
+<style>
+  button {
+    width: 150px;
+    height: 30px;
+  }
+
+  .container {
+            margin-left: 15%;
+            padding: 0 20px;
+            padding-bottom: 60px;
+  }
+</style>
+
+<p style="margin-left: 15%">결과조회입니다</p>
+
+<!--하이퍼링크 버튼-->
+<div class="container">
+  <button onclick="location.href = '{{ result_root }}scan/' ">
+    파일 스캔
+  </button>
+  <button onclick="location.href = '{{ result_root }}single/' ">
+    단일 결합
+  </button>
+  <button onclick="location.href = '{{ result_root }}multiple/' ">
+    다중 결합
+  </button>
+</div>
+
+<!--스캔 결과 조회시 화면-->
+{% if  type == 'scan' %}
+<!--숫자 스캔결과-->
+<div>Numeric Values</div>
+<table style = "margin-left: 15%">
+  <tr>
+    <th>table name</th>
+    <th>attribute name</th>
+    <th>data type</th>
+    <th>record_count</th>
+    <th>distinct count</th>
+    <th>null count</th>
+    <th>null ratio</th>
+    <th>zero count</th>
+    <th>zero ratio</th>
+    <th>min value</th>
+    <th>max value</th>
+    <th>is candidate</th>
+  </tr>
+
+    {% for row in numeric_rows%}
+  <tr> 
+      {% for val in row %}
+        <td>{{val}}</td>
+      {% endfor %}
+  </tr>
+    {% endfor %}
+</table>
+
+<!--문자 스캔결과-->
+<div>Categorical Values</div>
+<table style = "margin-left: 15%">
+  <tr>
+    <th>table name</th>
+    <th>attribute name</th>
+    <th>data type</th>
+    <th>record_count</th>
+    <th>distinct count</th>
+    <th>null count</th>
+    <th>null ratio</th>
+    <th>symbol count</th>
+  </tr>
+
+    {% for rows in categorical_rows%}
+  <tr> 
+      {% for vals in rows %}
+        <td>{{vals}}</td>
+      {% endfor %}
+  </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
 {% endblock %}
