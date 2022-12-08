@@ -59,7 +59,7 @@ def single():
 @bp.route("/multiple/")
 def multiple():
     global result_root
-        
+    
     return render_template("result.html",
                            type = 'multiple',
                            result_root = result_root)
