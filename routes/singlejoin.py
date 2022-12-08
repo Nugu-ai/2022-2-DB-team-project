@@ -17,9 +17,11 @@ def source_table_search():
 # ===================================================
 # target 테이블 검색
 # ===================================================
-@bp.route('/<table_name>', methods=['GET', 'POST'])
-def target_table_search(table_name):
-    tabledname = table_name
+@bp.route('/<source_table_name_jk>', methods=['GET', 'POST'])
+def target_table_search(source_table_name_jk):
+    tabledname = source_table_name_jk.split('+')[0]
+    joinkey = source_table_name_jk.split('+')[1]
+
     conn = db.get_db()
     with conn:
         cur = conn.cursor()
@@ -34,15 +36,7 @@ def target_table_search(table_name):
         for repr_attr_name in cur.fetchall():
             reprattr.append(repr_attr_name)
 
-        # 대표결합키
-        joinkey = []
-
-        cur.execute('SELECT key_name FROM join_key, std_join_key WHERE join_key.join_key_id = std_join_key.key_id AND table_name = %s', [tabledname])
-        for key_name in cur.fetchall():
-            joinkey.append(key_name)
-
         fin_reprattr = ''
-        fin_joinkey = ''
 
         if len(reprattr) == 0:
             fin_reprattr = '-'
@@ -56,23 +50,17 @@ def target_table_search(table_name):
                     fin_reprattr = fin_reprattr + str(list(reprattr)[i][0]) + ', '
                 fin_reprattr += str(list(reprattr)[len(list(reprattr))][0])
 
-        if len(joinkey) == 0:
-            fin_joinkey = '-'
-        else:
-            joinkey = set(joinkey)
-            if len(list(joinkey)) == 1:
-                for i in range(0, len(list(joinkey))):
-                    fin_joinkey = fin_joinkey + str(list(joinkey)[i][0])
-            else:
-                for i in range(0, len(list(joinkey)) - 1):
-                    fin_joinkey = fin_joinkey + str(list(joinkey)[i][0]) + ', '
-                fin_joinkey += str(list(joinkey)[len(list(joinkey)) - 1][0])
     
     return render_template(
         'singlejoin_target.html',
         table_name = tabledname,
         total_record = total_record,
         repr_attr = fin_reprattr,
-        join_key = fin_joinkey
+        join_key = joinkey
     )
-
+# ===================================================
+# 단일 결합 결과
+# ===================================================
+@bp.route('/<source_table_name_jk>/<target_table>', methods=['GET', 'POST'])
+def single_result(source_table_name_jk, target_table):
+    return render_template('singlejoin_result.html')

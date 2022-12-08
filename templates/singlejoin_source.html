@@ -43,7 +43,6 @@
                 <td style="background-color: #bbdefb;">표준 결합키</td>
                 <td>
                 <select style="width: 100%; height: 100%; border: none;" id="stdkey">
-                    <option value="">선택 안함</option>
                     <option value="주민등록번호">주민등록번호</option>
                     <option value="전화번호">전화번호</option>
                     <option value="차량번호">차량번호</option>
@@ -104,10 +103,10 @@
                     let tr, tname, records, rattrs, rkeys
                     for (const table of data) {
                         tr = document.createElement('tr');
-                        tr.id = table["table_name"]
+                        tr.id = table["table_name"] + '+' + table["join_keys"]
                         tr.onclick = () => {
                             if (selectedElement) document.getElementById(selectedElement).style.backgroundColor = 'white';
-                            selectedElement = table["table_name"];
+                            selectedElement = table["table_name"] + '+' + table["join_keys"];
                             document.getElementById(selectedElement).style.backgroundColor = 'lightgray';
                         }
                         tname = document.createElement('td');
@@ -137,6 +136,7 @@
                         }
                     
                         rkeys = document.createElement('td');
+                        console.log(table["join_keys"])
                         if (table["join_keys"].length > 1) {
                             rkeys.innerHTML = '';
                             for (const rkey of table["join_keys"]) {
