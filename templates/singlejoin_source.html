@@ -43,21 +43,21 @@
                 <td style="background-color: #bbdefb;">표준 결합키</td>
                 <td>
                 <select style="width: 100%; height: 100%; border: none;" id="stdkey">
-                    <option value="주민등록번호">주민등록번호</option>
+                    <!-- <option value="주민등록번호">주민등록번호</option>
                     <option value="전화번호">전화번호</option>
                     <option value="차량번호">차량번호</option>
                     <option value="이메일주소">이메일주소</option>
-                    <option value="IP">IP</option>
+                    <option value="IP">IP</option> -->
                 </select>
                 </td>
                 <td style="background-color: #bbdefb;">대표속성</td>
                 <td>
                 <select id="reprattr" style="width: 100%; border: none;">
-                    <option value="">선택 안함</option>
+                    <!-- <option value="">선택 안함</option>
                     <option value="학업정보">학업정보</option>
                     <option value="금융정보">금융정보</option>
                     <option value="회원정보">회원정보</option>
-                    <option value="건강정보">건강정보</option>
+                    <option value="건강정보">건강정보</option> -->
                 </select>
                 </td>
                 <td style="background-color: #bbdefb;">속성명</td>
@@ -82,6 +82,48 @@
     </div>
 
     <script>
+        // 대표결합키 목록 불러오기
+        (async () => {
+            let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
+
+            let selectElement = document.getElementById('stdkey');
+
+            let defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.innerHTML = '선택안함';
+
+            selectElement.appendChild(defaultOption);
+
+            for (const stdkey of fetchedKeyList) {
+                let optionElement = document.createElement('option');
+                optionElement.value = stdkey;
+                optionElement.innerHTML = stdkey;
+                selectElement.appendChild(optionElement);
+            }
+        }) ();
+
+
+        // 대표속성 목록 불러오기
+        (async () => {
+            let fetchedAttrList = await fetch('/stdattr').then((res) => res.json());
+
+            let selectElement = document.getElementById('reprattr');
+
+            let defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.innerHTML = '선택안함';
+
+            selectElement.appendChild(defaultOption);
+
+            for (const stdattr of fetchedAttrList) {
+                let optionElement = document.createElement('option');
+                optionElement.value = stdattr;
+                optionElement.innerHTML = stdattr;
+                selectElement.appendChild(optionElement);
+            }
+        }) ();
+
+
         let selectedElement;
         function search() {
             var dict = {}
