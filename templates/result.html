@@ -28,57 +28,80 @@
   </button>
 </div>
 
-<!--스캔 결과 조회시 화면-->
-{% if  type == 'scan' %}
-<!--숫자 스캔결과-->
-<div>Numeric Values</div>
+<!--스캔 테이블 선택 화면-->
+{% if  type == 'scan_select' %}
+<div>SCANNED TABLES</div>
+
 <table style = "margin-left: 15%">
+  <!--테이블 각 열 설명-->
   <tr>
     <th>table name</th>
-    <th>attribute name</th>
-    <th>data type</th>
-    <th>record_count</th>
-    <th>distinct count</th>
-    <th>null count</th>
-    <th>null ratio</th>
-    <th>zero count</th>
-    <th>zero ratio</th>
-    <th>min value</th>
-    <th>max value</th>
-    <th>is candidate</th>
+    <th>link button</th>
   </tr>
+
+  <!--테이블 내용 채우기-->
+  {% for table in table_rows %}
+    <tr>
+      {% for line in table %}
+        <td>{{line}}</td>
+        <td> <button onclick = "location.href = '{{result_root}}scan/{{line}}/'"> </td>
+      {% endfor %}
+    <tr>
+  {% endfor %}
+
+</table>
+
+<!--스캔 결과 표시-->
+{% elif type == 'scan_result' %}
+  <!--숫자 스캔결과-->
+  <div>Numeric Values</div>
+  <table style = "margin-left: 15%">
+    <tr>
+      <th>table name</th>
+      <th>attribute name</th>
+      <th>data type</th>
+      <th>record_count</th>
+      <th>distinct count</th>
+      <th>null count</th>
+      <th>null ratio</th>
+      <th>zero count</th>
+      <th>zero ratio</th>
+      <th>min value</th>
+      <th>max value</th>
+      <th>is candidate</th>
+    </tr>
 
     {% for row in numeric_rows%}
-  <tr> 
-      {% for val in row %}
-        <td>{{val}}</td>
-      {% endfor %}
-  </tr>
+      <tr> 
+          {% for val in row %}
+            <td>{{val}}</td>
+          {% endfor %}
+      </tr>
     {% endfor %}
-</table>
+  </table>
 
-<!--문자 스캔결과-->
-<div>Categorical Values</div>
-<table style = "margin-left: 15%">
-  <tr>
-    <th>table name</th>
-    <th>attribute name</th>
-    <th>data type</th>
-    <th>record_count</th>
-    <th>distinct count</th>
-    <th>null count</th>
-    <th>null ratio</th>
-    <th>symbol count</th>
-  </tr>
+  <!--문자 스캔결과-->
+    <div>Categorical Values</div>
+    <table style = "margin-left: 15%">
+      <tr>
+        <th>table name</th>
+        <th>attribute name</th>
+        <th>data type</th>
+        <th>record_count</th>
+        <th>distinct count</th>
+        <th>null count</th>
+        <th>null ratio</th>
+        <th>symbol count</th>
+      </tr>
 
-    {% for rows in categorical_rows%}
-  <tr> 
-      {% for vals in rows %}
-        <td>{{vals}}</td>
+      {% for rows in categorical_rows%}
+        <tr> 
+            {% for vals in rows %}
+              <td>{{vals}}</td>
+            {% endfor %}
+        </tr>
       {% endfor %}
-  </tr>
-    {% endfor %}
-</table>
+    </table>
 {% endif %}
 
 {% endblock %}
