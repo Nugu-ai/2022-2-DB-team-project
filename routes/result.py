@@ -68,6 +68,7 @@ def scan_result(table_name):
     
     return render_template("result.html", result_root = result_root,
                            type = 'scan_result',
+                           table_name = table_name,
                            numeric_rows = numerical_rows,
                            categoric_rows = categorical_rows)
 
