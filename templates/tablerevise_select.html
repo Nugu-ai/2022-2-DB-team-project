@@ -255,7 +255,7 @@
                     <td>`+attr[i]+`</td>
 
                     <td>
-                        <input type="text" style ="width:100px;" name="ChangeATTR" value="`+ datype[i] +`" id="` + attr[i] +`">
+                        <input type="text" style ="width:100px;" name="`+ attr[i] +`" value="`+ datype[i] +`">
                     </td>
 
                     <td> 
@@ -281,7 +281,9 @@
                     categoric_tr += `
                     <tr>
                         <td>`+attr[i]+`</td>
-                        <td>`+datype[i]+`</td>
+                        <td>
+                        <input type="text" style ="width:100px;" name="`+ attr[i] +`" value="`+ datype[i] +`">
+                        </td>
                         <td>
                             <input type="checkbox" id="Ccheck" name="check" class="Ccheck" value="` + attr[i] + `">
                         </td>
@@ -348,7 +350,18 @@
 
         Plotly.newPlot('boxplot',data,layout, {scrollZoom:true})
 
-        let JKList = document.querySelectorAll('.JK');
+        
+
+        
+        
+
+        
+        
+    </script>
+</form>
+
+<script>
+    let JKList = document.querySelectorAll('.JK');
         (async () => {
             let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
 
@@ -386,12 +399,6 @@
                 node.appendChild(selectElement);
             }
         })();
-
-        
-        
-
-        
-        
     </script>
-</form>
+
 {% endblock %}
