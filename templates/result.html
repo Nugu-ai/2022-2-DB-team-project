@@ -11,6 +11,8 @@
             padding: 0 20px;
             padding-bottom: 60px;
   }
+
+  
 </style>
 
 <script>
@@ -59,7 +61,7 @@ function saveCSV(fileName, link_id, table_id){
 
 <!--스캔 테이블 선택 화면-->
 {% if  type == 'scan_select' %}
-<div>SCANNED TABLES</div>
+<div class="container" >SCANNED TABLES</div>
 
 <table style = "margin-left: 15%">
   <!--테이블 각 열 설명-->
@@ -83,11 +85,13 @@ function saveCSV(fileName, link_id, table_id){
 <!--스캔 결과 표시-->
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
+  <div class="container">
     <button href ="" id = "numeric_download">수치속성 스캔결과 csv 다운로드</button>
     <button href ="" id = "categorical_download">범주속성 스캔결과 csv 다운로드</button>
+  </div>
 
   <!--숫자 스캔결과-->
-    <div>Numeric Values</div>
+    <div class="container">Numeric Values</div>
     <table style = "margin-left: 15%" id = "numeric_result">
       <tr>
         <th>table name</th>
