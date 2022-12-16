@@ -18,7 +18,7 @@ def select():
 
 @bp.route("/scan/")
 def scan_select():
-    global result_root
+    global result_root 
     
     conn = db.get_db()
     cursor = conn.cursor()

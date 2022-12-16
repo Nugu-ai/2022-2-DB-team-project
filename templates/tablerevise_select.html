@@ -52,17 +52,12 @@
         cursor: pointer;
     }
 
+    select {
+            text-align: center;
+    }
+
     .del {
         width: 100px;
-    }
-
-    .RA select {
-            width: 100%;
-            border: none;
-    }
-
-    .RA select:focus {
-            outline: none;
     }
 
     .JK select {
@@ -128,7 +123,7 @@
             </tbody>
         </table>
         
-             <button class="savebutton" type="submit">변경사항 저장</button>
+             <button class="savebutton" type="submit" id="save">변경사항 저장</button>
             
     </div>     
 </div>
@@ -258,7 +253,11 @@
                 numeric_tr += `
                 <tr>
                     <td>`+attr[i]+`</td>
-                    <td>`+datype[i]+`</td>
+
+                    <td>
+                        <input type="text" style ="width:100px;" name="ChangeATTR" value="`+ datype[i] +`" id="` + attr[i] +`">
+                    </td>
+
                     <td> 
                         <input type="checkbox" id="Ncheck" name="check" class="Ncheck" value="`+ attr[i] +`">
                     </td>
@@ -271,7 +270,7 @@
                     <td>`+(zerocount[numeric_count]/parseInt(recordcount[i]))+`</td>
                     <td>`+repr_attr[i]+`</td>
                     <td>`+candidate[i]+`</td>
-                    <td class='JK'></td>
+                    <td class="JK"></td>
                 </tr>
                 `
                 document.querySelector('.n_tbody').innerHTML = numeric_tr;
@@ -293,7 +292,7 @@
                         <td>`+(symbolcount[categoric_count]/parseInt(recordcount[i]))+`</td>
                         <td>`+repr_attr[i]+`</td>
                         <td>`+candidate[i]+`</td>
-                        <td class='JK'></td>
+                        <td class="JK"></td>
                     </tr>
                     `
                     document.querySelector('.c_tbody').innerHTML = categoric_tr;
@@ -349,9 +348,6 @@
 
         Plotly.newPlot('boxplot',data,layout, {scrollZoom:true})
 
-                      
-        
-
         let JKList = document.querySelectorAll('.JK');
         (async () => {
             let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
@@ -391,41 +387,7 @@
             }
         })();
 
-        let RAList = document.querySelectorAll('.RA');
-        (async () => {
-            let fetchedAttrList = await fetch('/stdattr').then((res) => res.json());
-
-            for (const node of RAList) {
-                let attributeName = node.parentNode.id;
-
-                let selectElement = document.createElement('select');
-                selectElement.setAttribute('name', attributeName + '_RA');
-                selectElement.setAttribute('form', 'save');
-
-                let defaultOption = document.createElement('option');
-                if (attr_name_RA.includes(attributeName)) {
-                    // 대표속성 있는 속성
-                    let n = attr_name_RA.indexOf(attributeName);
-                    defaultOption.innerHTML = repr_attr[n];
-                    selectElement.disabled = true;
-                } else {
-                    // 대표속성 없는 속성
-                    defaultOption.value = 'Null';
-                    defaultOption.innerHTML = '';
-                }
-                
-                selectElement.appendChild(defaultOption);
-
-                for (const stdattr of fetchedAttrList) {
-                    let optionElement = document.createElement('option');
-                    optionElement.value = stdattr;
-                    optionElement.innerHTML = stdattr;
-                    selectElement.appendChild(optionElement);
-                }
-
-                node.appendChild(selectElement);
-            }
-        })();
+        
         
 
         

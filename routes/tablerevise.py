@@ -50,8 +50,6 @@ def tablelist(table_name):
             candidate.append(is_candidate)
             isnumeric.append(is_numeric)
 
-        print(attr)
-
         # 수치속성
         zero = []
         minv = []
@@ -177,7 +175,7 @@ def delete_attr(table_name):
                 join_key_name = request.form[key]
                 join_key_id = join_key_list[join_key_name]
                     
-                stmt = f'INSERT INTO `JOIN_KEY` VALUES ("{table_name}", "{attr_name}", {join_key_id})'
+                stmt = f'UPDATE JOIN_KEY SET JOIN_KEY_ID = {join_key_id}" WHERE TABLE_NAME = {table_name}" AND ATTR_NAME = {attr_name}"'
                 print(stmt)
                 cur.execute(stmt)
         
