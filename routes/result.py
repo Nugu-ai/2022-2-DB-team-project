@@ -49,7 +49,7 @@ def scan_result(table_name):
         From ATTR, NUMERIC_ATTR
         WHERE ATTR.table_name = NUMERIC_ATTR.table_name
         AND ATTR.attr_name = NUMERIC_ATTR.attr_name
-        AND ATTR.table_name = {0}
+        AND ATTR.table_name = '{0}'
     """.format(table_name)
     
     categorical_row_sql = """
@@ -57,7 +57,7 @@ def scan_result(table_name):
         From ATTR, CATEGORICAL_ATTR
         WHERE ATTR.table_name = CATEGORICAL_ATTR.table_name 
         AND ATTR.attr_name = CATEGORICAL_ATTR.attr_name
-        AND ATTR.table_name = {0}
+        AND ATTR.table_name = '{0}'
     """.format(table_name)
     
     cursor.execute(numerical_row_sql)
