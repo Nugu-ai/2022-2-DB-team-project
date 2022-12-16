@@ -50,6 +50,8 @@ def tablelist(table_name):
             candidate.append(is_candidate)
             isnumeric.append(is_numeric)
 
+        print(attr)
+
         # 수치속성
         zero = []
         minv = []
@@ -73,13 +75,31 @@ def tablelist(table_name):
         # 대표속성
         attrname_RA = []
         reprattr = []
+        saveAttr = []
+        saveRttr = []
 
-        cur.execute(
-            'SELECT attr_name, repr_attr_name FROM repr_attr, std_repr_attr WHERE repr_attr.repr_attr_id = std_repr_attr.repr_attr_id AND table_name = %s', [tabledname])
+        cur.execute( 
+            'SELECT DISTINCT R.attr_name, S.repr_attr_name FROM repr_attr R, attr A, std_repr_attr S WHERE R.repr_attr_id = S.repr_attr_id AND R.attr_name = A.attr_name AND R.table_name = %s', [tabledname])
         for attr_name, repr_attr_name in cur.fetchall():
-            attrname_RA.append(attr_name)
-            reprattr.append(repr_attr_name)
-
+            saveAttr.append(attr_name)
+            saveRttr.append(repr_attr_name)
+        
+        for at in attr:
+            check = False
+            for num in range(len(saveAttr)):
+                if at == saveAttr[num]:
+                    check = True
+                    break
+                else:
+                    check = False
+                                
+            if(check):
+                attrname_RA.append(saveAttr[num])
+                reprattr.append(saveRttr[num])
+            else:
+                attrname_RA.append("-")
+                reprattr.append("-")
+                
         # 대표결합키
         attrname_JK = []
         joinkey = []
@@ -137,10 +157,30 @@ def delete_attr(table_name):
         cur = conn.cursor()
 
         getDeleteList = request.form.getlist('check')
-        print(getDeleteList)
 
         for name in getDeleteList:
             cur.execute('DELETE FROM attr WHERE attr_name = %s AND table_name = %s' , ([name],[tabledname]))
             conn.commit()
+        
+        join_key_list = {}
+        cur.execute('SELECT `key_id`, `key_name` FROM `STD_JOIN_KEY`')
+        for key_id, key_name in cur.fetchall():
+            join_key_list[key_name] = key_id
 
-    return redirect(url_for('tablerevise.tablelist', table_name = tabledname))
+        for key in request.form.keys():
+            if request.form[key] == 'Null':
+                continue
+
+            attr_name = key[:-3]
+
+            if key[-2:] == 'JK':
+                join_key_name = request.form[key]
+                join_key_id = join_key_list[join_key_name]
+                    
+                stmt = f'INSERT INTO `JOIN_KEY` VALUES ("{table_name}", "{attr_name}", {join_key_id})'
+                print(stmt)
+                cur.execute(stmt)
+        
+        conn.commit()
+ 
+    return redirect(url_for('tablerevise.tablelist', table_name = tabledname)) 
