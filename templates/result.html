@@ -15,7 +15,38 @@
   
 </style>
 
-
+<script>
+  // Quick and simple export target #table_id into a csv
+function download_table_as_csv(table_id, separator = ',') {
+  // Select rows from table_id
+  var rows = document.querySelectorAll('table#' + table_id + ' tr');
+  // Construct csv
+  var csv = [];
+  for (var i = 0; i < rows.length; i++) {
+      var row = [], cols = rows[i].querySelectorAll('td, th');
+      for (var j = 0; j < cols.length; j++) {
+          // Clean innertext to remove multiple spaces and jumpline (break csv)
+          var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+          // Escape double-quote with double-double-quote (see https://stackoverflow.com/questions/17808511/properly-escape-a-double-quote-in-csv)
+          data = data.replace(/"/g, '""');
+          // Push escaped string
+          row.push('"' + data + '"');
+      }
+      csv.push(row.join(separator));
+  }
+  var csv_string = csv.join('\n');
+  // Download it
+  var filename = 'export_' + table_id + '_' + new Date().toLocaleDateString() + '.csv';
+  var link = document.createElement('a');
+  link.style.display = 'none';
+  link.setAttribute('target', '_blank');
+  link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+</script>
 
 <p style="margin-left: 15%">결과조회입니다</p>
 
@@ -59,7 +90,7 @@
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
   <div class="container">
-    <button href ="" id = "download">수치속성 스캔결과 csv 다운로드</button>
+    <a href="#" onclick="download_table_as_csv('csvtable');">Download as CSV</a>
     <button href ="" id = "categorical_download">범주속성 스캔결과 csv 다운로드</button>
   </div>
 
@@ -112,39 +143,7 @@
         </tr>
       {% endfor %}
     </table>
-    <script>
-      document.addEventListener('DOMContentLoaded', function(){
-        document.getElementById('download').addEventListener('click', function(){
-          saveCSV('data.csv'); // CSV파일 다운로드 함수 호출
-          return false;
-        })
-      });
-      
-      //CSV 생성 함수
-      function saveCSV(fileName){
-          //CSV 문자열 생성
-          let downLink = document.getElementById('download');
-          let csv = ''; //CSV최종 문자열을 저장하는 변수
-          let rows = document.querySelectorAll("#csvtable tr"); // 테이블에서 행 요소들을 모두 선택
-      
-          //행단위 루핑
-          for (var i = 0; i < rows.length; i++) {
-              let cells = rows[i].querySelectorAll("td, th");
-              let row = [];
-              //행의 셀 값을 배열로 얻기
-              cells.forEach(function(cell){
-                row.push(cell.innerHTML);
-              });
-      
-              csv += row.join(',') + (i != rows.length-1 ? '\n':''); // 배열을 문자열+줄바꿈으로 변환
-          }
-      
-          //CSV 파일 저장
-          csvFile = new Blob([csv], {type: "text/csv"}); // 생성한 CSV 문자열을 Blob 데이터로 생성
-          downLink.href = window.URL.createObjectURL(csvFile); // Blob 데이터를 URL 객체로 감싸 다운로드 하이퍼링크에 붙임.
-          downLink.download = fileName; // 인자로 받은 다운로드 파일명을 지정
-      }
-    </script>
+  
 
 {% endif %}
 
