@@ -42,6 +42,24 @@ function saveCSV(fileName, link_id, table_id){
   downLink.href = window.URL.createObjectURL(csvFile); // Blob 데이터를 URL 객체로 감싸 다운로드 하이퍼링크에 붙임.
   downLink.download = fileName; // 인자로 받은 다운로드 파일명을 지정
 }
+
+//수치 속성 다운로드 버튼 연결
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('numeric_download').addEventListener('click', function(){
+    let numerical_reuslt_file_name = "{{ table_name }}_numerical_scan.csv"
+    saveCSV(numerical_reuslt_file_name,'numeric_download', 'numeric_result'); // CSV파일 다운로드 함수 호출
+    return false;
+  })
+});
+
+//범주 속성 다운로드 버튼 연결
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('categorical_download').addEventListener('click', function(){
+    let categorical_reuslt_file_name = "{{ table_name }}_categorical_scan.csv"
+    saveCSV(categorical_reuslt_file_name,'categorical_download', 'categorical_result'); // CSV파일 다운로드 함수 호출
+    return false;
+  })
+});
 </script>
 
 <p style="margin-left: 15%">결과조회입니다</p>
@@ -140,27 +158,6 @@ function saveCSV(fileName, link_id, table_id){
       {% endfor %}
     </table>
 
-  <!--버튼을 통해서 csv 다운로드 받을 수 있게 연결-->
-    <script>
-      //수치 속성 다운로드 버튼 연결
-      document.addEventListener('DOMContentLoaded', function(){
-        document.getElementById('numeric_download').addEventListener('click', function(){
-          let numerical_reuslt_file_name = "{{ table_name }}_numerical_scan.csv"
-          saveCSV(numerical_reuslt_file_name,'numeric_download', 'numeric_result'); // CSV파일 다운로드 함수 호출
-          return false;
-        })
-      });
-
-      //범주 속성 다운로드 버튼 연결
-      document.addEventListener('DOMContentLoaded', function(){
-        document.getElementById('categorical_download').addEventListener('click', function(){
-          let categorical_reuslt_file_name = "{{ table_name }}_categorical_scan.csv"
-          saveCSV(categorical_reuslt_file_name,'categorical_download', 'categorical_result'); // CSV파일 다운로드 함수 호출
-          return false;
-        })
-      });
-    
-    </script>
 {% endif %}
 
 
