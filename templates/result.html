@@ -58,7 +58,9 @@
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
   <div class="container">
-    <a href="#" onclick="download_table_as_csv('csvtable');">Download as CSV</a>
+    <button type="button" onclick="tableToCSV()">
+      download CSV
+  </button>
     <button href ="" id = "categorical_download">범주속성 스캔결과 csv 다운로드</button>
   </div>
 

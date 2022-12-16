@@ -73,17 +73,22 @@ def scan_result(table_name):
                            categoric_rows = categorical_rows)
 
 @bp.route("/single/")
-def single():
+def single_select():
     global result_root
+    
+    conn = db.get_db()
+    cursor = conn.cursor()
         
     return render_template("result.html",
                            type = 'single',
                            result_root = result_root)
 
 @bp.route("/multiple/")
-def multiple():
+def multiple_select():
     global result_root
-    print('test2')
+    
+    conn = db.get_db()
+    cursor = conn.cursor()
     
     return render_template("result.html",
                            type = 'multiple',
