@@ -16,50 +16,63 @@
 </style>
 
 <script>
-  //CSV 생성 함수
-function saveCSV(fileName, link_id, table_id){
-  //CSV 문자열 생성
-  let downLink = document.getElementById(link_id);
-  let csv = ''; //CSV최종 문자열을 저장하는 변수
+  class ToCSV {
+    constructor() {
+        // CSV 버튼에 이벤트 등록
+        document.querySelector('#csvDownloadButton').addEventListener('click', e => {
+            e.preventDefault()
+            this.getCSV('mycsv.csv')
+        })
+    }
 
-  let table_tr = "#" + table_id + " tr"
-  let rows = document.querySelectorAll(table_tr); // 테이블에서 행 요소들을 모두 선택
+    downloadCSV(csv, filename) {
+        let csvFile;
+        let downloadLink;
 
-  //행단위 루핑
-  for (var i = 0; i < rows.length; i++) {
-      let cells = rows[i].querySelectorAll("td, th");
-      let row = [];
-      //행의 셀 값을 배열로 얻기
-      cells.forEach(function(cell){
-        row.push(cell.innerHTML);
-      });
+        // CSV 파일을 위한 Blob 만들기
+        csvFile = new Blob([csv], {type: "text/csv"})
 
-      csv += row.join(',') + (i != rows.length-1 ? '\n':''); // 배열을 문자열+줄바꿈으로 변환
-  }
+        // Download link를 위한 a 엘리먼스 생성
+        downloadLink = document.createElement("a")
 
-  //CSV 파일 저장
-  csvFile = new Blob([csv], {type: "text/csv"}); // 생성한 CSV 문자열을 Blob 데이터로 생성
-  downLink.href = window.URL.createObjectURL(csvFile); // Blob 데이터를 URL 객체로 감싸 다운로드 하이퍼링크에 붙임.
-  downLink.download = fileName; // 인자로 받은 다운로드 파일명을 지정
+        // 다운받을 csv 파일 이름 지정하기
+        downloadLink.download = filename;
+
+        // 위에서 만든 blob과 링크를 연결
+        downloadLink.href = window.URL.createObjectURL(csvFile)
+
+        // 링크가 눈에 보일 필요는 없으니 숨겨줍시다.
+        downloadLink.style.display = "none"
+
+        // HTML 가장 아래 부분에 링크를 붙여줍시다.
+        document.body.appendChild(downloadLink)
+
+        // 클릭 이벤트를 발생시켜 실제로 브라우저가 '다운로드'하도록 만들어줍시다.
+        downloadLink.click()
+    }
+
+    getCSV(filename) {
+        // csv를 담기 위한 빈 Array를 만듭시다.
+        const csv = []
+        const rows = document.querySelectorAll("#mytable table tr")
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = [], cols = rows[i].querySelectorAll("td, th")
+
+            for (let j = 0; j < cols.length; j++)
+                row.push(cols[j].innerText)
+
+            csv.push(row.join(","))
+        }
+
+        // Download CSV
+        this.downloadCSV(csv.join("\n"), filename)
+    }
 }
 
-//수치 속성 다운로드 버튼 연결
-document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('numeric_download').addEventListener('click', function(){
-    let numerical_reuslt_file_name = "{{ table_name }}_numerical_scan.csv"
-    saveCSV(numerical_reuslt_file_name,'numeric_download', 'numeric_result'); // CSV파일 다운로드 함수 호출
-    return false;
-  })
-});
-
-//범주 속성 다운로드 버튼 연결
-document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('categorical_download').addEventListener('click', function(){
-    let categorical_reuslt_file_name = "{{ table_name }}_categorical_scan.csv"
-    saveCSV(categorical_reuslt_file_name,'categorical_download', 'categorical_result'); // CSV파일 다운로드 함수 호출
-    return false;
-  })
-});
+document.addEventListener('DOMContentLoaded', e => {
+    new ToCSV()
+})
 </script>
 
 <p style="margin-left: 15%">결과조회입니다</p>
@@ -104,13 +117,13 @@ document.addEventListener('DOMContentLoaded', function(){
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
   <div class="container">
-    <button href ="" id = "numeric_download">수치속성 스캔결과 csv 다운로드</button>
+    <button href ="" id = "csvDownloadButton">수치속성 스캔결과 csv 다운로드</button>
     <button href ="" id = "categorical_download">범주속성 스캔결과 csv 다운로드</button>
   </div>
 
   <!--숫자 스캔결과-->
     <div class="container">Numeric Values</div>
-    <table style = "margin-left: 15%" id = "numeric_result">
+    <table style = "margin-left: 15%" id = "mytable">
       <tr>
         <th>table name</th>
         <th>attribute name</th>
