@@ -1,4 +1,4 @@
-import db
+import db, re
 from flask import Blueprint, redirect, render_template, request, session, url_for
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
@@ -191,15 +191,37 @@ def delete_attr(table_name):
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         if(asdf == "INTEGER"): 
                             cur.execute('UPDATE ATTR SET data_type = "INT" WHERE attr_name = "%s" AND table_name = %s', (attr[num], tabledname))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} INT')
                             conn.commit()
                         else:
                             cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                             conn.commit()
-                    elif(asdf in ["VARCHAR", "TEXT", "LONGTEXT"]):
+
+                    elif(asdf in ["TEXT", "LONGTEXT"]):
                         cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
                         cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
                         cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                         conn.commit()
+
+                    elif(asdf.startswith("VARCHAR") and asdf.strip()[-1] == ")"):
+                        result = re.sub(r'[^0-9]', '', asdf)
+                        print(result)
+                        maxlength = 0
+
+                        cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
+                        for dat in cur.fetchall():
+                            if maxlength < len(str(dat)): maxlength = len(str(dat))
+                        
+                        if int(result) >= maxlength:
+
+                            cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                            cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                            conn.commit()
+
                 #범주속성 데이터형 변경
                 else:
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
@@ -233,10 +255,28 @@ def delete_attr(table_name):
                             min_value = cur.fetchone()[0]
 
                             cur.execute("INSERT INTO NUMERIC_ATTR VALUES (%s, %s, %s, %s, %s)", (tabledname, attr[num], zero_count, min_value, max_value))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                             conn.commit()
-                    elif(asdf in ["VARCHAR", "TEXT", "LONGTEXT"]):
+
+                    elif(asdf in ["TEXT", "LONGTEXT"]):
                         cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                         conn.commit()
+
+                    elif(asdf.startswith("VARCHAR") and asdf.strip()[-1] == ")"):
+                        result = re.sub(r'[^0-9]', '', asdf)
+                        print(result)
+                        maxlength = 0
+
+                        cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
+                        for dat in cur.fetchall():
+                            if maxlength < len(str(dat)): maxlength = len(str(dat))
+                        
+                        if int(result) >= maxlength:
+
+                            cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                            conn.commit()
         
         #
         #결합키 매핑
