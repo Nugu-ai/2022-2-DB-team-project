@@ -205,22 +205,12 @@ def delete_attr(table_name):
                         cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                         conn.commit()
 
-                    elif(asdf.startswith("VARCHAR") and asdf.strip()[-1] == ")"):
-                        result = re.sub(r'[^0-9]', '', asdf)
-                        print(result)
-                        maxlength = 0
-
-                        cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
-                        for dat in cur.fetchall():
-                            if maxlength < len(str(dat)): maxlength = len(str(dat))
-                        
-                        if int(result) >= maxlength:
-
-                            cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
-                            cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
-                            cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
-                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
-                            conn.commit()
+                    elif(asdf.startswith("VARCHAR")):
+                        cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                        cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} VARCHAR(100)')
+                        conn.commit()
 
                 #범주속성 데이터형 변경
                 else:
@@ -263,20 +253,10 @@ def delete_attr(table_name):
                         cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
                         conn.commit()
 
-                    elif(asdf.startswith("VARCHAR") and asdf.strip()[-1] == ")"):
-                        result = re.sub(r'[^0-9]', '', asdf)
-                        print(result)
-                        maxlength = 0
-
-                        cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
-                        for dat in cur.fetchall():
-                            if maxlength < len(str(dat)): maxlength = len(str(dat))
-                        
-                        if int(result) >= maxlength:
-
-                            cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
-                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
-                            conn.commit()
+                    elif(asdf.startswith("VARCHAR")):
+                        cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} VARCHAR(100)')
+                        conn.commit()
         
         #
         #결합키 매핑
