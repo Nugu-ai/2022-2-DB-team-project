@@ -185,12 +185,14 @@ def delete_attr(table_name):
         
         for num in range(len(attr)):
             asdf = request.form.get(attr[num])   
+            print(asdf)
             if datype[num] != asdf and attr[num] not in Delete:   #속성값의 데이터형 변경 여부 확인
                 #수치속성 데이터형 변경
                 if isnumeric[num] == 'T':
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         if(asdf == "INTEGER"): 
-                            cur.execute('UPDATE ATTR SET data_type = "INT" WHERE attr_name = "%s" AND table_name = %s', (attr[num], tabledname))
+                            print('실행')
+                            cur.execute('UPDATE ATTR SET data_type = "INT" WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
                             cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} INT')
                             conn.commit()
                         else:
