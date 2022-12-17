@@ -42,6 +42,7 @@
 
     td {
         border: 1px solid black;
+      
     }
 
     button {
@@ -52,31 +53,37 @@
         cursor: pointer;
     }
 
+    select {
+        text-align: center;
+        width: 100%;
+        border: none;
+    }
+
+    select:focus {
+        outline: none;
+    }
+
     .del {
         width: 100px;
     }
 
-    .RA select {
-            width: 100%;
-            border: none;
+    #submit {
+        width: 250px;
+        height: 30px;
+        background-color: #009688;
+        border: none;
+        color: white;
+        float: right;
     }
 
-    .RA select:focus {
-            outline: none;
+    #reset {
+        width: 150px;
+        height: 30px;
+        margin-right: 15px;
+        float: right;
     }
-
-    .JK select {
-            width: 100%;
-            border: none;
-    }
-
-    .JK select:focus {
-            outline: none;
-    }
-
 </style>
 
-<form method="post" action="{{table_name}}/delete">
 <h1 style="margin-left:15%; padding: 0 20px">테이블 속성 편집</h1>
 <h2 style="margin-left:15%; padding: 0 20px">{{table_name}} 속성 도메인 스캔</h2>
 <div class="container"> 
@@ -127,9 +134,10 @@
             <tbody class="c_tbody">
             </tbody>
         </table>
-        
-             <button class="savebutton" type="submit">변경사항 저장</button>
-            
+        <form method="post" action="{{table_name}}/delete" id="save">
+            <input id="submit" type="submit" value="변경사항 저장">
+            <input id="reset" type="reset" value="초기화">
+        </form>
     </div>     
 </div>
 
@@ -238,10 +246,10 @@
     attr_name_JK = attr_name_JK.split(',')
 
     let join_key = '{{join_key}}'
+    join_key = join_key.replace(" '","")
     join_key = join_key.replace(/&#39;/g,"")
     join_key = join_key.replace("[","")
     join_key = join_key.replace("]","")
-    join_key = join_key.replace(/(\s*)/g,"")
     join_key = join_key.split(',')
 
 
@@ -256,11 +264,11 @@
         for (let i=0; i<num; i++) {
             if (isnumeric[i] == 'T') {
                 numeric_tr += `
-                <tr>
+                <tr id=${attr[i]}>
                     <td>`+attr[i]+`</td>
-                    <td>`+datype[i]+`</td>
+                    <td class="datatype"></td>
                     <td> 
-                        <input type="checkbox" id="Ncheck" name="check" class="Ncheck" value="`+ attr[i] +`">
+                        <input form="save" type="checkbox" id="Ncheck" name="check" class="Ncheck" value="`+ attr[i] +`">
                     </td>
                     <td>`+nullcount[i]+`</td>
                     <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
@@ -271,7 +279,7 @@
                     <td>`+(zerocount[numeric_count]/parseInt(recordcount[i]))+`</td>
                     <td>`+repr_attr[i]+`</td>
                     <td>`+candidate[i]+`</td>
-                    <td class='JK'></td>
+                    <td class="JK"></td>
                 </tr>
                 `
                 document.querySelector('.n_tbody').innerHTML = numeric_tr;
@@ -280,11 +288,11 @@
             
             else if (isnumeric[i] == 'F') {
                     categoric_tr += `
-                    <tr>
+                    <tr id=${attr[i]}>
                         <td>`+attr[i]+`</td>
-                        <td>`+datype[i]+`</td>
+                        <td class="datatype"></td>
                         <td>
-                            <input type="checkbox" id="Ccheck" name="check" class="Ccheck" value="` + attr[i] + `">
+                            <input form="save" type="checkbox" id="Ccheck" name="check" class="Ccheck" value="` + attr[i] + `">
                         </td>
                         <td>`+nullcount[i]+`</td>
                         <td>`+(parseInt(nullcount[i])/parseInt(recordcount[i]))+`</td>
@@ -293,7 +301,7 @@
                         <td>`+(symbolcount[categoric_count]/parseInt(recordcount[i]))+`</td>
                         <td>`+repr_attr[i]+`</td>
                         <td>`+candidate[i]+`</td>
-                        <td class='JK'></td>
+                        <td class="JK"></td>
                     </tr>
                     `
                     document.querySelector('.c_tbody').innerHTML = categoric_tr;
@@ -303,6 +311,45 @@
         };
 
         CreateTuple(total_record)
+
+        // 데이터 타입 <select>
+        const DataTypes = [
+            "INTEGER",
+            "DOUBLE",
+            "FLOAT",
+            "VARCHAR",
+            "TEXT",
+            "LONGTEXT",
+        ];
+
+        let tdList = document.querySelectorAll('.datatype');
+        (() => {
+            for (const node of tdList) {
+                let attributeName = node.parentNode.id;
+
+                let selectElement = document.createElement('select');
+                selectElement.setAttribute('name', attributeName);
+                selectElement.setAttribute('form', 'save');
+                
+                let defaultOption = document.createElement('option');
+                let n = attr.indexOf(attributeName);
+                defaultOption.value = datype[n];
+                defaultOption.innerHTML = datype[n];
+                
+                selectElement.appendChild(defaultOption);
+
+                for (let dtype of DataTypes) {
+                    if (dtype !== datype[n]) {
+                        let optionElement = document.createElement('option');
+                        optionElement.value = dtype;
+                        optionElement.innerHTML = dtype;
+                        selectElement.appendChild(optionElement);
+                    }
+                }
+
+                node.appendChild(selectElement);
+            }
+        })();
 
 
         /* BOXPLOT 생성 */
@@ -349,9 +396,8 @@
 
         Plotly.newPlot('boxplot',data,layout, {scrollZoom:true})
 
-                      
-        
 
+        // 대표 결합키
         let JKList = document.querySelectorAll('.JK');
         (async () => {
             let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
@@ -368,7 +414,6 @@
                     // 대표결합키 있는 속성
                     let n = attr_name_JK.indexOf(attributeName);
                     defaultOption.innerHTML = join_key[n];
-                    selectElement.disabled = true;
                 } else {
                     // 대표결합키 없는 속성
                     defaultOption.value = 'Null';
@@ -376,6 +421,10 @@
                 }
 
                 selectElement.appendChild(defaultOption);
+                let blank = document.createElement('option');
+                blank.value = 'Null';
+                blank.innerHTML = '';
+                selectElement.appendChild(blank);
 
                 for (const stdkey of fetchedKeyList) {
                     let optionElement = document.createElement('option');
@@ -390,46 +439,6 @@
                 node.appendChild(selectElement);
             }
         })();
-
-        let RAList = document.querySelectorAll('.RA');
-        (async () => {
-            let fetchedAttrList = await fetch('/stdattr').then((res) => res.json());
-
-            for (const node of RAList) {
-                let attributeName = node.parentNode.id;
-
-                let selectElement = document.createElement('select');
-                selectElement.setAttribute('name', attributeName + '_RA');
-                selectElement.setAttribute('form', 'save');
-
-                let defaultOption = document.createElement('option');
-                if (attr_name_RA.includes(attributeName)) {
-                    // 대표속성 있는 속성
-                    let n = attr_name_RA.indexOf(attributeName);
-                    defaultOption.innerHTML = repr_attr[n];
-                    selectElement.disabled = true;
-                } else {
-                    // 대표속성 없는 속성
-                    defaultOption.value = 'Null';
-                    defaultOption.innerHTML = '';
-                }
-                
-                selectElement.appendChild(defaultOption);
-
-                for (const stdattr of fetchedAttrList) {
-                    let optionElement = document.createElement('option');
-                    optionElement.value = stdattr;
-                    optionElement.innerHTML = stdattr;
-                    selectElement.appendChild(optionElement);
-                }
-
-                node.appendChild(selectElement);
-            }
-        })();
-        
-
-        
-        
     </script>
-</form>
+
 {% endblock %}

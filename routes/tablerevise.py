@@ -1,5 +1,7 @@
-import db
+import db, re
 from flask import Blueprint, redirect, render_template, request, session, url_for
+import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 
 bp = Blueprint('tablerevise', __name__, url_prefix='/tablerevise', template_folder='templates')
@@ -49,8 +51,6 @@ def tablelist(table_name):
             distinct.append(distinct_count)
             candidate.append(is_candidate)
             isnumeric.append(is_numeric)
-
-        print(attr)
 
         # 수치속성
         zero = []
@@ -146,41 +146,161 @@ def tablelist(table_name):
     )
 
 # ===================================================
-# 테이블 속성 삭제
+# 테이블 속성 삭제, 데이터형 변경, 결합키 매핑
 # ===================================================
-@bp.route('/<table_name>/delete', methods=['POST'])
+@bp.route('/<table_name>/delete', methods=['GET', 'POST'])
 def delete_attr(table_name):
     tabledname = table_name
 
     conn = db.get_db()
     with conn:
         cur = conn.cursor()
-
+        
+        #
+        #삭제
+        #
         getDeleteList = request.form.getlist('check')
+        Delete = []
 
         for name in getDeleteList:
+            Delete.append(name)  
             cur.execute('DELETE FROM attr WHERE attr_name = %s AND table_name = %s' , ([name],[tabledname]))
             conn.commit()
+
+        #
+        #데이터형 변경
+        #
+        attr = []
+        datype = []
+        isnumeric = []
+
+        cur.execute(
+            'SELECT attr_name, data_type, is_numeric FROM attr WHERE table_name = %s', [tabledname]
+        )
+
+        for attr_name, data_type, is_numeric in cur.fetchall():
+            attr.append(attr_name)
+            datype.append(data_type)
+            isnumeric.append(is_numeric)
         
+        for num in range(len(attr)):
+            asdf = request.form.get(attr[num])   
+            if datype[num] != asdf and attr[num] not in Delete:   #속성값의 데이터형 변경 여부 확인
+                #수치속성 데이터형 변경
+                if isnumeric[num] == 'T':
+                    if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
+                        if(asdf == "INTEGER"): 
+                            cur.execute('UPDATE ATTR SET data_type = "INT" WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} INT')
+                            conn.commit()
+                        else:
+                            cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                            conn.commit()
+
+                    elif(asdf in ["TEXT", "LONGTEXT"]):
+                        cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                        cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                        conn.commit()
+
+                    elif(asdf.startswith("VARCHAR")):
+                        cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                        cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} VARCHAR(100)')
+                        conn.commit()
+
+                #범주속성 데이터형 변경
+                else:
+                    if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
+                        languageFlag = False
+                        cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
+                        for project in cur.fetchall():
+                            #수치속성으로 변경 가능여부 체크
+                            try:
+                                number = float(project[0])
+                                languageFlag = False
+                            except TypeError:
+                                languageFlag = True
+                            except ValueError:
+                                languageFlag = True
+                        
+                        if languageFlag == False:
+                            cur.execute('DELETE FROM CATEGORICAL_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            if asdf == "INTEGER": asdf = "INT"
+                            cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "T" WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
+
+                            cur.execute(
+                                f'SELECT COUNT(*) FROM {table_name} WHERE `{attr[num]}` = 0')
+                            zero_count = cur.fetchone()[0]
+
+                            cur.execute(
+                                f'SELECT MAX(`{attr[num]}`) FROM {table_name}')
+                            max_value = cur.fetchone()[0]
+
+                            cur.execute(
+                                f'SELECT MIN(`{attr[num]}`) FROM {table_name}')
+                            min_value = cur.fetchone()[0]
+
+                            cur.execute("INSERT INTO NUMERIC_ATTR VALUES (%s, %s, %s, %s, %s)", (tabledname, attr[num], zero_count, min_value, max_value))
+                            cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                            conn.commit()
+
+                    elif(asdf in ["TEXT", "LONGTEXT"]):
+                        cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} {asdf}')
+                        conn.commit()
+
+                    elif(asdf.startswith("VARCHAR")):
+                        cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
+                        cur.execute(f'ALTER TABLE {tabledname} MODIFY {attr[num]} VARCHAR(100)')
+                        conn.commit()
+        
+        #
+        #결합키 매핑
+        #
         join_key_list = {}
         cur.execute('SELECT `key_id`, `key_name` FROM `STD_JOIN_KEY`')
         for key_id, key_name in cur.fetchall():
             join_key_list[key_name] = key_id
 
         for key in request.form.keys():
-            if request.form[key] == 'Null':
-                continue
 
-            attr_name = key[:-3]
+            #결합키 삭제
+            if request.form[key] == 'Null' and key[:-3] not in Delete:
+                checklist = []
+                attr_name = key[:-3]
+                cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
+                for att in cur.fetchall():
+                    checklist.append(att[0])
+                
+                if attr_name not in checklist:
+                    continue
+                else:
+                    cur.execute(f'DELETE FROM JOIN_KEY WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
+                    conn.commit()
+                    continue
 
-            if key[-2:] == 'JK':
-                join_key_name = request.form[key]
-                join_key_id = join_key_list[join_key_name]
-                    
-                stmt = f'INSERT INTO `JOIN_KEY` VALUES ("{table_name}", "{attr_name}", {join_key_id})'
-                print(stmt)
-                cur.execute(stmt)
+            #결합키 새로 추가 or 변경
+            elif request.form[key] != 'Null' and key[:-3] not in Delete:
+                attr_name = key[:-3]
+
+                if key[-2:] == 'JK':
+                    join_key_name = request.form[key]
+                    join_key_id = join_key_list[join_key_name]
+
+                    checklist = []
+                    cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
+                    for att in cur.fetchall():
+                        checklist.append(att[0])
+
+                    if attr_name not in checklist: 
+                        stmt = f'INSERT INTO `JOIN_KEY` VALUES ("{table_name}", "{attr_name}", {join_key_id})'
+                    else:
+                        stmt = f'UPDATE JOIN_KEY SET JOIN_KEY_ID = "{join_key_id}" WHERE TABLE_NAME = "{table_name}" AND ATTR_NAME = "{attr_name}"'
+                    cur.execute(stmt)
+                    conn.commit()
         
-        conn.commit()
- 
     return redirect(url_for('tablerevise.tablelist', table_name = tabledname)) 
