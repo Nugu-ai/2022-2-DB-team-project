@@ -190,10 +190,10 @@ def delete_attr(table_name):
                 if isnumeric[num] == 'T':
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         if(asdf == "INTEGER"): 
-                            cur.execute('UPDATE ATTR SET data_type = "INT", WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            cur.execute('UPDATE ATTR SET data_type = "INT" WHERE attr_name = "%s" AND table_name = %s', (attr[num], tabledname))
                             conn.commit()
                         else:
-                            cur.execute('UPDATE ATTR SET data_type = %s, WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
+                            cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
                             conn.commit()
                     elif(asdf in ["VARCHAR", "TEXT", "LONGTEXT"]):
                         cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
