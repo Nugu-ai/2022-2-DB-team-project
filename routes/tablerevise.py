@@ -181,9 +181,13 @@ def delete_attr(table_name):
             asdf = request.form.get(attr[num])
             if datype[num] != asdf:
                 if isnumeric[num] == 'T':
-                    if(asdf in ["INTEGER", "INT", "DOUBLE"]):
-                        cur.execute('UPDATE ATTR SET data_type = %s, WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
-                        conn.commit()
+                    if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
+                        if(asdf == "INTEGER"): 
+                            cur.execute('UPDATE ATTR SET data_type = "INT", WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            conn.commit()
+                        else:
+                            cur.execute('UPDATE ATTR SET data_type = %s, WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
+                            conn.commit()
                     elif(asdf in ["VARCHAR", "TEXT", "LONGTEXT"]):
                         cur.execute('DELETE FROM NUMERIC_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
                         cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
@@ -191,11 +195,10 @@ def delete_attr(table_name):
                         conn.commit()
                 else:
                     
-                    if(asdf in ["INTEGER", "INT", "DOUBLE"]):
+                    if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         languageFlag = False
                         cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
                         for project in cur.fetchall():
-                            print(project)
                             try:
                                 number = float(project[0])
                                 languageFlag = False
@@ -206,6 +209,7 @@ def delete_attr(table_name):
                         
                         if languageFlag == False:
                             cur.execute('DELETE FROM CATEGORICAL_ATTR WHERE attr_name = %s AND table_name = %s', (attr[num], tabledname))
+                            if asdf == "INTEGER": asdf = "INT"
                             cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "T" WHERE attr_name = %s AND table_name = %s', (asdf, attr[num], tabledname))
 
                             cur.execute(
@@ -234,16 +238,36 @@ def delete_attr(table_name):
 
         for key in request.form.keys():
             if request.form[key] == 'Null':
-                continue
-
+                checklist = []
+                attr_name = key[:-3]
+                cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
+                for att in cur.fetchall():
+                    print(att)
+                    checklist.append(att[0])
+                
+                if attr_name not in checklist:
+                    continue
+                else:
+                    cur.execute(f'DELETE FROM JOIN_KEY WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
+                    continue
+            
+            print(key)
             attr_name = key[:-3]
 
             if key[-2:] == 'JK':
                 join_key_name = request.form[key]
                 join_key_id = join_key_list[join_key_name]
-                    
-                stmt = f'UPDATE JOIN_KEY SET JOIN_KEY_ID = {join_key_id}" WHERE TABLE_NAME = {table_name}" AND ATTR_NAME = {attr_name}"'
-                print(stmt)
+
+                checklist = []
+                cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
+                for att in cur.fetchall():
+                    print(att)
+                    checklist.append(att[0])
+
+                if attr_name not in checklist: 
+                    stmt = f'INSERT INTO `JOIN_KEY` VALUES ("{table_name}", "{attr_name}", {join_key_id})'
+                else:
+                    stmt = f'UPDATE JOIN_KEY SET JOIN_KEY_ID = "{join_key_id}" WHERE TABLE_NAME = "{table_name}" AND ATTR_NAME = "{attr_name}"'
                 cur.execute(stmt)
         
         conn.commit()

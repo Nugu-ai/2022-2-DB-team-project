@@ -71,7 +71,7 @@
 
 </style>
 
-<form method="post" action="{{table_name}}/delete">
+<form method="post" action="{{table_name}}/delete" id="save">
 <h1 style="margin-left:15%; padding: 0 20px">테이블 속성 편집</h1>
 <h2 style="margin-left:15%; padding: 0 20px">{{table_name}} 속성 도메인 스캔</h2>
 <div class="container"> 
@@ -251,7 +251,7 @@
         for (let i=0; i<num; i++) {
             if (isnumeric[i] == 'T') {
                 numeric_tr += `
-                <tr>
+                <tr id=${attr[i]}>
                     <td>`+attr[i]+`</td>
 
                     <td>
@@ -279,7 +279,7 @@
             
             else if (isnumeric[i] == 'F') {
                     categoric_tr += `
-                    <tr>
+                    <tr id=${attr[i]}>
                         <td>`+attr[i]+`</td>
                         <td>
                         <input type="text" style ="width:100px;" name="`+ attr[i] +`" value="`+ datype[i] +`">
@@ -377,7 +377,6 @@
                     // 대표결합키 있는 속성
                     let n = attr_name_JK.indexOf(attributeName);
                     defaultOption.innerHTML = join_key[n];
-                    selectElement.disabled = true;
                 } else {
                     // 대표결합키 없는 속성
                     defaultOption.value = 'Null';
@@ -385,6 +384,10 @@
                 }
 
                 selectElement.appendChild(defaultOption);
+                let blank = document.createElement('option');
+                blank.value = 'Null';
+                blank.innerHTML = '';
+                selectElement.appendChild(blank);
 
                 for (const stdkey of fetchedKeyList) {
                     let optionElement = document.createElement('option');
