@@ -53,25 +53,36 @@
     }
 
     select {
-            text-align: center;
+        text-align: center;
+        width: 100%;
+        border: none;
+    }
+
+    select:focus {
+        outline: none;
     }
 
     .del {
         width: 100px;
     }
 
-    .JK select {
-            width: 100%;
-            border: none;
+    #submit {
+        width: 250px;
+        height: 30px;
+        background-color: #009688;
+        border: none;
+        color: white;
+        float: right;
     }
 
-    .JK select:focus {
-            outline: none;
+    #reset {
+        width: 150px;
+        height: 30px;
+        margin-right: 15px;
+        float: right;
     }
-
 </style>
 
-<form method="post" action="{{table_name}}/delete" id="save">
 <h1 style="margin-left:15%; padding: 0 20px">테이블 속성 편집</h1>
 <h2 style="margin-left:15%; padding: 0 20px">{{table_name}} 속성 도메인 스캔</h2>
 <div class="container"> 
@@ -122,9 +133,10 @@
             <tbody class="c_tbody">
             </tbody>
         </table>
-        
-             <button class="savebutton" type="submit" id="save">변경사항 저장</button>
-            
+        <form method="post" action="{{table_name}}/delete" id="save">
+            <input id="submit" type="submit" value="변경사항 저장">
+            <input id="reset" type="reset" value="초기화">
+        </form>
     </div>     
 </div>
 
@@ -253,11 +265,7 @@
                 numeric_tr += `
                 <tr id=${attr[i]}>
                     <td>`+attr[i]+`</td>
-
-                    <td>
-                        <input type="text" style ="width:100px;" name="`+ attr[i] +`" value="`+ datype[i] +`">
-                    </td>
-
+                    <td class="datatype"></td>
                     <td> 
                         <input type="checkbox" id="Ncheck" name="check" class="Ncheck" value="`+ attr[i] +`">
                     </td>
@@ -281,9 +289,7 @@
                     categoric_tr += `
                     <tr id=${attr[i]}>
                         <td>`+attr[i]+`</td>
-                        <td>
-                        <input type="text" style ="width:100px;" name="`+ attr[i] +`" value="`+ datype[i] +`">
-                        </td>
+                        <td class="datatype"></td>
                         <td>
                             <input type="checkbox" id="Ccheck" name="check" class="Ccheck" value="` + attr[i] + `">
                         </td>
@@ -304,6 +310,45 @@
         };
 
         CreateTuple(total_record)
+
+        // 데이터 타입 <select>
+        const DataTypes = [
+            "INTEGER",
+            "DOUBLE",
+            "FLOAT",
+            "VARCHAR",
+            "TEXT",
+            "LONGTEXT",
+        ];
+
+        let tdList = document.querySelectorAll('.datatype');
+        (() => {
+            for (const node of tdList) {
+                let attributeName = node.parentNode.id;
+
+                let selectElement = document.createElement('select');
+                selectElement.setAttribute('name', attributeName);
+                selectElement.setAttribute('form', 'save');
+                
+                let defaultOption = document.createElement('option');
+                let n = attr.indexOf(attributeName);
+                defaultOption.value = datype[n];
+                defaultOption.innerHTML = datype[n];
+                
+                selectElement.appendChild(defaultOption);
+
+                for (let dtype of DataTypes) {
+                    if (dtype !== datype[n]) {
+                        let optionElement = document.createElement('option');
+                        optionElement.value = dtype;
+                        optionElement.innerHTML = dtype;
+                        selectElement.appendChild(optionElement);
+                    }
+                }
+
+                node.appendChild(selectElement);
+            }
+        })();
 
 
         /* BOXPLOT 생성 */
@@ -350,18 +395,9 @@
 
         Plotly.newPlot('boxplot',data,layout, {scrollZoom:true})
 
-        
 
-        
-        
-
-        
-        
-    </script>
-</form>
-
-<script>
-    let JKList = document.querySelectorAll('.JK');
+        // 대표 결합키
+        let JKList = document.querySelectorAll('.JK');
         (async () => {
             let fetchedKeyList = await fetch('/stdkey').then((res) => res.json());
 
