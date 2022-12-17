@@ -156,16 +156,20 @@ def delete_attr(table_name):
     with conn:
         cur = conn.cursor()
         
+        #
         #삭제
+        #
         getDeleteList = request.form.getlist('check')
         Delete = []
 
         for name in getDeleteList:
-            Delete.append(name)
+            Delete.append(name)  
             cur.execute('DELETE FROM attr WHERE attr_name = %s AND table_name = %s' , ([name],[tabledname]))
             conn.commit()
 
+        #
         #데이터형 변경
+        #
         attr = []
         datype = []
         isnumeric = []
@@ -180,8 +184,9 @@ def delete_attr(table_name):
             isnumeric.append(is_numeric)
         
         for num in range(len(attr)):
-            asdf = request.form.get(attr[num])
-            if datype[num] != asdf and attr[num] not in Delete:
+            asdf = request.form.get(attr[num])   
+            if datype[num] != asdf and attr[num] not in Delete:   #속성값의 데이터형 변경 여부 확인
+                #수치속성 데이터형 변경
                 if isnumeric[num] == 'T':
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         if(asdf == "INTEGER"): 
@@ -195,12 +200,13 @@ def delete_attr(table_name):
                         cur.execute('UPDATE ATTR SET data_type = %s, is_numeric = "F" WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
                         cur.execute("INSERT INTO CATEGORICAL_ATTR VALUES (%s, %s, 0)", (tabledname, attr[num]))
                         conn.commit()
+                #범주속성 데이터형 변경
                 else:
-                    
                     if(asdf in ["INTEGER", "INT", "DOUBLE", "FLOAT"]):
                         languageFlag = False
                         cur.execute(f'SELECT {attr[num]} FROM {tabledname}')
                         for project in cur.fetchall():
+                            #수치속성으로 변경 가능여부 체크
                             try:
                                 number = float(project[0])
                                 languageFlag = False
@@ -232,13 +238,17 @@ def delete_attr(table_name):
                         cur.execute('UPDATE ATTR SET data_type = %s WHERE attr_name = %s AND table_name = %s', (asdf,attr[num], tabledname))
                         conn.commit()
         
+        #
         #결합키 매핑
+        #
         join_key_list = {}
         cur.execute('SELECT `key_id`, `key_name` FROM `STD_JOIN_KEY`')
         for key_id, key_name in cur.fetchall():
             join_key_list[key_name] = key_id
 
         for key in request.form.keys():
+
+            #결합키 삭제
             if request.form[key] == 'Null' and key[:-3] not in Delete:
                 checklist = []
                 attr_name = key[:-3]
@@ -252,7 +262,8 @@ def delete_attr(table_name):
                     cur.execute(f'DELETE FROM JOIN_KEY WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
                     conn.commit()
                     continue
-            
+
+            #결합키 새로 추가 or 변경
             elif request.form[key] != 'Null' and key[:-3] not in Delete:
                 attr_name = key[:-3]
 
@@ -272,6 +283,4 @@ def delete_attr(table_name):
                     cur.execute(stmt)
                     conn.commit()
         
-        
- 
     return redirect(url_for('tablerevise.tablelist', table_name = tabledname)) 
