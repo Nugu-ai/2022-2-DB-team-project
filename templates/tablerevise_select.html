@@ -42,6 +42,7 @@
 
     td {
         border: 1px solid black;
+      
     }
 
     button {
@@ -245,10 +246,10 @@
     attr_name_JK = attr_name_JK.split(',')
 
     let join_key = '{{join_key}}'
+    join_key = join_key.replace(" '","")
     join_key = join_key.replace(/&#39;/g,"")
     join_key = join_key.replace("[","")
     join_key = join_key.replace("]","")
-    join_key = join_key.replace(/(\s*)/g,"")
     join_key = join_key.split(',')
 
 
