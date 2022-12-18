@@ -100,8 +100,8 @@ def single_select(type,used_table, join_ratio_limit, min_record_num_limit):
     """.format(type)
     
     #사용자로부터 조건을 입력받지 않으면, NONE으로 조건에 대응되는 주소부분 값 설정
-    #조건을 입력받을경우, 조건값을 대응되는 주소부분 값으로 설정(html 상에서)
-    #주소를통해 조건이 있다면, 그에 해당하는 SQL 조건문 추가
+    #조건을 입력받을경우, 조건값에 대응되는 주소부분 값으로 설정(html 상에서)
+    #주소를통해 조건이 있음을 인식 >> 그에 해당하는 SQL 조건문 추가
     if used_table != "NONE" :
         joined_result_sql += " AND (source_table_name = '{0}' OR target_table_name = '{0}')".format(used_table)
     
