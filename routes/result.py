@@ -40,6 +40,15 @@ def scan_select():
     cursor.execute(select_table_sql)
     tables = cursor.fetchall()
     
+    #스캔된 테이블들을 담은 배열에, 각 테이블의 레코드 개수 추가
+    for i in range(len(tables)) :
+        count_record_sql = """
+            SELECT count(*)
+            FROM {0}
+        """.format(tables[i][0])
+        cursor.execute(count_record_sql)
+        tables[i][1] = cursor.fetchone()[0]
+        
     
     return render_template("result.html",result_root = result_root,
                            type = 'scan_select', 
@@ -64,12 +73,13 @@ def scan_result(table_name):
     
     #범주속성들을 불러오는 SQL문
     categorical_row_sql = """
-        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count,  null_count/record_count,  symbol_count, is_candidate
+        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count,  null_count/record_count,  symbol_count, symbol_count/record_count, is_candidate
         From ATTR, CATEGORICAL_ATTR
         WHERE ATTR.table_name = CATEGORICAL_ATTR.table_name 
         AND ATTR.attr_name = CATEGORICAL_ATTR.attr_name
         AND ATTR.table_name = '{0}'
     """.format(table_name)
+    
     
     cursor.execute(numerical_row_sql)
     numerical_rows = cursor.fetchall()
@@ -77,6 +87,54 @@ def scan_result(table_name):
     cursor.execute(categorical_row_sql)
     categorical_rows = cursor.fetchall()
     
+    for i in range(len(numerical_rows)) :
+        represent_attr_sql = """
+            SELECT repr_attr_name
+            FROM REPR_ATTR, STD_REPR_ATTR
+            WHERE REPR_ATTR.repr_attr_id = STD_REPR_ATTR.repr_attr_id
+            AND table_name = '{0}'
+            AND attr_name = '{1}'
+        """.format(table_name, numerical_rows[i][0])
+        
+        join_key_sql = """
+            SELECT key_name
+            FROM JOIN_KEY, STD_JOIN_KEY
+            WHERE JOIN_KEY.join_key_id = STD_JOIN_KEY.key_id
+            AND table_name = '{0}'
+            AND attr_name = '{1}'
+        """.format(table_name, numerical_rows[i][0])
+        
+        #이 아랫부분 수정 필요할수도 있음 - sql 반환값이 없을 경우 어떻게 되는지 모름
+        cursor.execute(represent_attr_sql)
+        numerical_rows[i].append(cursor.fetchone()[0])
+        
+        cursor.execute(join_key_sql)
+        numerical_rows[i].append(cursor.fetchone()[0])
+    
+    for i in range(len(categorical_rows)) :
+        represent_attr_sql = """
+            SELECT repr_attr_name
+            FROM REPR_ATTR, STD_REPR_ATTR
+            WHERE REPR_ATTR.repr_attr_id = STD_REPR_ATTR.repr_attr_id
+            AND table_name = '{0}'
+            AND attr_name = '{1}'
+        """.format(table_name, categorical_rows[i][0])
+        
+        join_key_sql = """
+            SELECT key_name
+            FROM JOIN_KEY, STD_JOIN_KEY
+            WHERE JOIN_KEY.join_key_id = STD_JOIN_KEY.key_id
+            AND table_name = '{0}'
+            AND attr_name = '{1}'
+        """.format(table_name, categorical_rows[i][0])
+        
+        #이 아랫부분 수정 필요할수도 있음 - sql 반환값이 없을 경우 어떻게 되는지 모름
+        cursor.execute(represent_attr_sql)
+        categorical_rows[i].append(cursor.fetchone()[0])
+        
+        cursor.execute(join_key_sql)
+        categorical_rows[i].append(cursor.fetchone()[0])
+        
     return render_template("result.html", result_root = result_root,
                            type = 'scan_result',
                            table_name = table_name,
