@@ -64,17 +64,18 @@
 <table style = "margin-left: 15%">
   <!--테이블 각 열 설명-->
   <tr>
-    <th>table name</th>
-    <th>link button</th>
+    <th>테이블 명</th>
+    <th>레코드 수</th>
+    <th>테이블 상세 버튼</th>
   </tr>
 
   <!--테이블 내용 채우기-->
-  {% for table in table_rows %}
+  {% for row in table_rows %}
     <tr>
-      {% for line in table %}
-        <td>{{line}}</td>
-        <td> <button onclick = "location.href = '{{result_root}}scan/{{line}}/'">{{ line }}</button> </td>
+      {% for val in row %}
+        <td>{{val}}</td>
       {% endfor %}
+        <td> <button onclick = "location.href = '{{result_root}}scan/{{val}}/'">{{ val }}</button> </td>
     <tr>
   {% endfor %}
 
@@ -91,19 +92,21 @@
 
   <!--숫자 스캔결과-->
     <table style = "margin-left: 15%" id = "csvtable">
-      <caption>{{table_name}}Numeric Values</caption>
+      <caption>{{table_name}}|수치 속성</caption>
       <tr>
-        <th>attribute name</th>
-        <th>data type</th>
-        <th>record_count</th>
-        <th>distinct count</th>
-        <th>null count</th>
-        <th>null ratio</th>
-        <th>zero count</th>
-        <th>zero ratio</th>
-        <th>min value</th>
-        <th>max value</th>
-        <th>is candidate</th>
+        <th>속성명</th>
+        <th>데이터 타입</th>
+        <th>레코드 개수</th>
+        <th>상이 수치 값</th>
+        <th>NULL 레코드 개수</th>
+        <th>NULL 레코드 비율</th>
+        <th>0 레코드 수</th>
+        <th>0 레코드 비율</th>
+        <th>최소 값</th>
+        <th>최대 값</th>
+        <th>결합키 후보</th>
+        <th>대표 속성</th>
+        <th>대표 결합키</th>
       </tr>
 
       {% for row in numeric_rows%}
@@ -117,15 +120,19 @@
 
   <!--문자 스캔결과-->
     <table style = "margin-left: 15%" id = "categorical_result">
-      <caption>{{table_name}}Categorical Values</caption>
+      <caption>{{table_name}}|범주 속성</caption>
       <tr>
-        <th>attribute name</th>
-        <th>data type</th>
-        <th>record_count</th>
-        <th>distinct count</th>
-        <th>null count</th>
-        <th>null ratio</th>
-        <th>symbol count</th>
+        <th>속성명</th>
+        <th>데이터 타입</th>
+        <th>레코드 개수</th>
+        <th>상이 범주 값</th>
+        <th>NULL 레코드 수</th>
+        <th>NULL 레코드 비율</th>
+        <th>특수문자 포함 레코드 수</th>
+        <th>특수문자 포함 레코드 비율</th>
+        <th>결합키 후보</th>
+        <th>대표 속성</th>
+        <th>대표 결합키</th>
       </tr>
 
       {% for rows in categoric_rows%}
