@@ -122,6 +122,7 @@ def tablelist(table_name):
         cur.execute(f'SELECT {numeric_attr} FROM {tabledname}')
         numeric_attr_data = cur.fetchall()
 
+
     return render_template(
         'tablerevise_select.html',
         table_name=tabledname,
@@ -165,6 +166,7 @@ def delete_attr(table_name):
         for name in getDeleteList:
             Delete.append(name)  
             cur.execute('DELETE FROM attr WHERE attr_name = %s AND table_name = %s' , ([name],[tabledname]))
+            cur.execute(f'ALTER TABLE {tabledname} DROP COLUMN {name}')
             conn.commit()
 
         #

@@ -119,14 +119,31 @@ def single_select(type,used_table, join_ratio_limit, min_record_num_limit):
                            result_root = result_root,
                            joined_result = joined_result)
 
-@bp.route("/JOINresult/<type>/<table_A>/<table_B>")
-def join_result(type, table_A, table_B) :
+@bp.route("/JOINresult/<type>/<id>/<inner_id>/")
+def join_result(type, id, inner_id) :
     
     global result_root
     
     conn = db.get_db()
     cursor = conn.cursor()
     
+    if type == "SINGLE" :
+        src_table = "단일결합테이블_{0}".format(id)
+
+    else :
+        src_table = "다중결합테이블_{0}_{1}".format(id, inner_id)
+    
+    table_result_sql = """
+    SELECT *
+    FROM {0}
+    """.format(src_table)
+    
+    cursor.execute(table_result_sql)
+    table_result = cursor.fetchall()
+    
     return render_template("result.html",
                            type = 'result',
-                           result_root = result_root)
+                           result_root = result_root,
+                           table_result = table_result,
+                           id = id,
+                           inner_id = inner_id)

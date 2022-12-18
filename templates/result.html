@@ -1,4 +1,11 @@
-{% extends "index.html" %} 
+{% extends "index.html" %}
+
+{% block head %}
+  <!--진행상황 동기화를 위해 새로고침 설정-->
+  {% if type == 'MULTIPLE' %}
+  <meta http-equiv="refresh" content="5;">
+  {% endif %}
+{% endblock %} 
 {% block content %}
 <style>
   button {
@@ -12,10 +19,29 @@
             padding-bottom: 60px;
   }
 
-  
+  table {
+    border-collapse: collapse;
+    font-size: 14.5px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  thead {
+    background: #bbdefb;
+  }
+
+  th {
+    border: 1px solid black;
+  }
+
+  td {
+    border: 1px solid black;
+  }
+
+  button:hover {
+    cursor: pointer;
+}
 </style>
-
-
 <p style="margin-left: 15%">결과조회입니다</p>
 
 <!--하이퍼링크 버튼-->
@@ -23,10 +49,10 @@
   <button onclick="location.href = '{{ result_root }}scan/' ">
     파일 스캔
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE/' ">
     단일 결합
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE/' ">
     다중 결합
   </button>
 </div>
@@ -119,15 +145,16 @@
     <form name = "single_select_condition" method = "post">
       <fieldset>
         <legend>검색 조건 입력</legend>
-          포함할 테이블 : <input type ="text" name = "used_table"> <br>
-          최소 결합률 : <input type = "text" name = "joined_ratio_limit"> <br>
-          최소 레코드 수 : <input type = "text" name = "min_record_num_limit"> <br>
+          포함할 테이블 : <input type ="text" id = "used_table"> <br>
+          최소 결합률 : <input type = "text" id = "joined_ratio_limit"> <br>
+          최소 레코드 수 : <input type = "text" id = "min_record_num_limit"> <br>
       </fieldset>
     </form>
     <button onclick = 'conditiond_result()'>조건 맞게 검색</button>
 
     <!--현재 화면에보이는 결과 CSV로 다운로드-->
-    <button onclick = 'tableToCSV()'>CSV로 다운로드</button>
+    <!--함수에 집어넣는 값 : 다운로드 받을 파일 명-->
+    <button onclick = "tableToCSV( '{{type}}_JoinResult.csv' )">CSV로 다운로드</button> 
 
     <!--결과 테이블-->
     <table>
@@ -135,10 +162,10 @@
       <tr>
         <th>ID</th>
         {% if type == "MULTIPLE" %}
-        <th>Inner ID</th>
+          <th>Inner ID</th>
         {% endif %}
         <th>테이블 A</th>
-        <th>A 레코드수<th>
+        <th>A 레코드수</th>
         <th>A 결합키</th>
         <th>테이블 B</th>
         <th>B 레코드수</th>
@@ -158,23 +185,61 @@
         {% for val in row %}
           <td>{{val}}</td>
         {% endfor %}
-        <td> <button onclick = "location.href = {{result_root}}result/">세부링크</button> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+
+          {% if type == "SINGLE" %}
+            <td> <a href = "location.href = {{result_root}}JOINresult/SINGLE/{{row[0]}}/NONE/">세부링크</a> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+            
+          {% elif type == "MULTIPLE" %}
+            <td> <a href = "location.href = {{result_root}}JOINresult/MULTIPLE/{{row[0]}}/{{row[1]}}/">세부링크</a>
+          
+          {% endif %}
         </tr>
       {% endfor %} 
     </table>
   </div>
 
-{% elif type == 'MULTIPLE' %}
+<!--결합결과 테이블 보여줌-->
+{%elif type == 'result'%}
+  <div class = "container">
+    <button onclick ="tableToCSV('{{type}}_{{id}}_{{inner_id}}_joinresult.csv')">CSV 다운로드</button>
+    <table>
+      {% for row in table_result %}
+        <tr>
+          {% for val in row %}
+            <td>{{val}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
 
-
+  </div>
 {% endif %}
 
   <script type="text/javascript">
+    
     function conditiond_result(){
+      //결합결과 조회페이지에서 검색기능을 활용했을 시, 그에 대응되는 페이지로 이동하게 하는 함수
 
+      var used_table_part = document.getElementById('used_table').value;
+      var joined_ratio_limit_part = document.getElementById('joined_ratio_limit').value;
+      var min_record_num_limit_part = document.getElementById('min_record_num_limit').value;
+
+      if (used_table_part == ""){
+        used_table_part = "NONE";
+      }
+      if (joined_ratio_limit_part == ""){
+        joined_ratio_limit_part = "NONE";
+      }
+      if (min_record_num_limit_part == ""){
+        min_record_num_limit_part = "NONE";
+      }
+      
+      const address = "{{ result_root }}JOINlist/{{ type }}/"+ used_table_part + "/"+ joined_ratio_limit_part + "/" + min_record_num_limit_part + "/";
+
+      window.location.href = address;
     }
 
-    function tableToCSV() {
+    function tableToCSV(file_name) {
 
         // Variable to store the final csv data
         var csv_data = [];
@@ -203,11 +268,11 @@
         csv_data = csv_data.join('\n');
 
         // Call this function to download csv file
-        downloadCSVFile(csv_data);
+        downloadCSVFile(csv_data,file_name);
 
     }
 
-    function downloadCSVFile(csv_data) {
+    function downloadCSVFile(csv_data,file_name) {
 
         // Create CSV file object and feed
         // our csv_data into it
@@ -220,7 +285,7 @@
         var temp_link = document.createElement('a');
 
         // Download csv file
-        temp_link.download = "GfG.csv";
+        temp_link.download = file_name;
         var url = window.URL.createObjectURL(CSVFile);
         temp_link.href = url;
 
