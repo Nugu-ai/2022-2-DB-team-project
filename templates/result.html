@@ -23,10 +23,10 @@
   <button onclick="location.href = '{{ result_root }}scan/' ">
     파일 스캔
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE/' ">
     단일 결합
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE/' ">
     다중 결합
   </button>
 </div>
@@ -127,7 +127,8 @@
     <button onclick = 'conditiond_result()'>조건 맞게 검색</button>
 
     <!--현재 화면에보이는 결과 CSV로 다운로드-->
-    <button onclick = 'tableToCSV()'>CSV로 다운로드</button>
+    <!--함수에 집어넣는 값 : 다운로드 받을 파일 명-->
+    <button onclick = "tableToCSV( '{{type}}_JoinResult.csv' )">CSV로 다운로드</button> 
 
     <!--결과 테이블-->
     <table>
@@ -164,7 +165,6 @@
     </table>
   </div>
 
-{% elif type == 'MULTIPLE' %}
 
 
 {% endif %}
@@ -174,7 +174,7 @@
 
     }
 
-    function tableToCSV() {
+    function tableToCSV(file_name) {
 
         // Variable to store the final csv data
         var csv_data = [];
@@ -203,11 +203,11 @@
         csv_data = csv_data.join('\n');
 
         // Call this function to download csv file
-        downloadCSVFile(csv_data);
+        downloadCSVFile(csv_data,file_name);
 
     }
 
-    function downloadCSVFile(csv_data) {
+    function downloadCSVFile(csv_data,file_name) {
 
         // Create CSV file object and feed
         // our csv_data into it
@@ -220,7 +220,7 @@
         var temp_link = document.createElement('a');
 
         // Download csv file
-        temp_link.download = "GfG.csv";
+        temp_link.download = file_name;
         var url = window.URL.createObjectURL(CSVFile);
         temp_link.href = url;
 
