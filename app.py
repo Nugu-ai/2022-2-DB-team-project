@@ -184,7 +184,7 @@ def stdkey():
         return Response(status=401, mimetype='application/json')
 
 
-from routes import dblogin, tablescan, tablerevise, singlejoin, multiplejoin, result
+from routes import dblogin, tablescan, tablerevise, singlejoin, multiplejoin, result, preferences
 
 app.register_blueprint(dblogin.bp)
 app.register_blueprint(tablescan.bp)
@@ -192,6 +192,7 @@ app.register_blueprint(tablerevise.bp)
 app.register_blueprint(singlejoin.bp)
 app.register_blueprint(multiplejoin.bp)
 app.register_blueprint(result.bp)
+app.register_blueprint(preferences.bp)
 
 
 if __name__ == '__main__':
