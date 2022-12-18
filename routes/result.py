@@ -78,7 +78,8 @@ def single_select():
     
     conn = db.get_db()
     cursor = conn.cursor()
-        
+    
+    
     return render_template("result.html",
                            type = 'single',
                            result_root = result_root)
