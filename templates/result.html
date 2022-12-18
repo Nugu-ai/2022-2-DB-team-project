@@ -23,10 +23,10 @@
   <button onclick="location.href = '{{ result_root }}scan/' ">
     파일 스캔
   </button>
-  <button onclick="location.href = '{{ result_root }}single/' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE' ">
     단일 결합
   </button>
-  <button onclick="location.href = '{{ result_root }}multiple/' ">
+  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE' ">
     다중 결합
   </button>
 </div>
@@ -61,14 +61,12 @@
     <button type="button" onclick="tableToCSV()">
       download CSV
   </button>
-    <button href ="" id = "categorical_download">범주속성 스캔결과 csv 다운로드</button>
   </div>
 
   <!--숫자 스캔결과-->
-    <div class="container">Numeric Values</div>
     <table style = "margin-left: 15%" id = "csvtable">
+      <caption>{{table_name}}Numeric Values</caption>
       <tr>
-        <th>table name</th>
         <th>attribute name</th>
         <th>data type</th>
         <th>record_count</th>
@@ -92,10 +90,9 @@
     </table>
 
   <!--문자 스캔결과-->
-    <div>Categorical Values</div>
     <table style = "margin-left: 15%" id = "categorical_result">
+      <caption>{{table_name}}Categorical Values</caption>
       <tr>
-        <th>table name</th>
         <th>attribute name</th>
         <th>data type</th>
         <th>record_count</th>
@@ -114,10 +111,69 @@
       {% endfor %}
     </table>
   
+{% elif type == 'SINGLE' or type == 'MULTIPLE' %}
+  <!--단일결합 결과조회-->
+
+  <!--조건선택 부분-->
+  <div class ="container">
+    <form name = "single_select_condition" method = "post">
+      <fieldset>
+        <legend>검색 조건 입력</legend>
+          포함할 테이블 : <input type ="text" name = "used_table"> <br>
+          최소 결합률 : <input type = "text" name = "joined_ratio_limit"> <br>
+          최소 레코드 수 : <input type = "text" name = "min_record_num_limit"> <br>
+      </fieldset>
+    </form>
+    <button onclick = 'conditiond_result()'>조건 맞게 검색</button>
+
+    <!--현재 화면에보이는 결과 CSV로 다운로드-->
+    <button onclick = 'tableToCSV()'>CSV로 다운로드</button>
+
+    <!--결과 테이블-->
+    <table>
+      <!--맨 윗행(설명하는부분)-->
+      <tr>
+        <th>ID</th>
+        {% if type == "MULTIPLE" %}
+        <th>Inner ID</th>
+        {% endif %}
+        <th>테이블 A</th>
+        <th>A 레코드수<th>
+        <th>A 결합키</th>
+        <th>테이블 B</th>
+        <th>B 레코드수</th>
+        <th>B 결합키</th>
+        <th>결합테이블 이름</th>
+        <th>결합키(표준이름)</th>
+        <th>결합테이블 레코드수</th>
+        <th>A 결합 성공률</th>
+        <th>B 결합 성공률</th>
+        <th>완료여부</th>
+        <th>진행률</th>
+        <th>결과링크</th>
+      </tr>
+      <!--테이블 내용 완성-->
+      {% for row in joined_result %}
+        <tr>
+        {% for val in row %}
+          <td>{{val}}</td>
+        {% endfor %}
+        <td> <button onclick = "location.href = {{result_root}}result/">세부링크</button> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+        </tr>
+      {% endfor %} 
+    </table>
+  </div>
+
+{% elif type == 'MULTIPLE' %}
+
 
 {% endif %}
 
   <script type="text/javascript">
+    function conditiond_result(){
+
+    }
+
     function tableToCSV() {
 
         // Variable to store the final csv data
