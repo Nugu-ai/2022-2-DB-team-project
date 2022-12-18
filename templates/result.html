@@ -202,15 +202,15 @@
 {%elif type == 'result'%}
   <div class = "container">
     <button onclick ="tableToCSV('{{type}}_{{id}}_{{inner_id}}_joinresult.csv')">CSV 다운로드</button>
-
-    {% for row in table_result %}
-      <tr>
-        {% for val in row %}
-          <td>{{val}}</td>
-        {% endfor %}
-      </tr>
-    {% endfor %}
-
+    <table>
+      {% for row in table_result %}
+        <tr>
+          {% for val in row %}
+            <td>{{val}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
 
   </div>
 {% endif %}
