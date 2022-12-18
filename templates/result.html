@@ -1,4 +1,11 @@
-{% extends "index.html" %} 
+{% extends "index.html" %}
+
+{% block head %}
+  <!--진행상황 동기화를 위해 새로고침 설정-->
+  {% if type == 'MULTIPLE' %}
+  <meta http-equiv="refresh" content="5;">
+  {% endif %}
+{% endblock %} 
 {% block content %}
 <style>
   button {
@@ -34,11 +41,7 @@
   button:hover {
     cursor: pointer;
 }
-
-  
 </style>
-
-
 <p style="margin-left: 15%">결과조회입니다</p>
 
 <!--하이퍼링크 버튼-->
@@ -159,10 +162,10 @@
       <tr>
         <th>ID</th>
         {% if type == "MULTIPLE" %}
-        <th>Inner ID</th>
+          <th>Inner ID</th>
         {% endif %}
         <th>테이블 A</th>
-        <th>A 레코드수<th>
+        <th>A 레코드수</th>
         <th>A 결합키</th>
         <th>테이블 B</th>
         <th>B 레코드수</th>
@@ -182,20 +185,40 @@
         {% for val in row %}
           <td>{{val}}</td>
         {% endfor %}
-        <td> <a href = "location.href = {{result_root}}result/">세부링크</a> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+
+          {% if type == "SINGLE" %}
+            <td> <a href = "location.href = {{result_root}}JOINresult/SINGLE/{{row[0]}}/NONE/">세부링크</a> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+            
+          {% elif type == "MULTIPLE" %}
+            <td> <a href = "location.href = {{result_root}}JOINresult/MULTIPLE/{{row[0]}}/{{row[1]}}/">세부링크</a>
+          
+          {% endif %}
         </tr>
       {% endfor %} 
     </table>
   </div>
 
+<!--결합결과 테이블 보여줌-->
+{%elif type == 'result'%}
+  <div class = "container">
+    <button onclick ="tableToCSV('{{type}}_{{id}}_{{inner_id}}_joinresult.csv')">CSV 다운로드</button>
+
+    {% for row in table_result %}
+      <tr>
+        {% for val in row %}
+          <td>{{val}}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
 
 
+  </div>
 {% endif %}
 
   <script type="text/javascript">
     
     function conditiond_result(){
-      //결합결과 조회페이지에서, 검색기능을 활용했을 시 그 페이지로 이동하게 하는 함수
+      //결합결과 조회페이지에서 검색기능을 활용했을 시, 그에 대응되는 페이지로 이동하게 하는 함수
 
       var used_table_part = document.getElementById('used_table').value;
       var joined_ratio_limit_part = document.getElementById('joined_ratio_limit').value;
