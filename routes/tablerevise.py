@@ -97,8 +97,8 @@ def tablelist(table_name):
                 attrname_RA.append(saveAttr[num])
                 reprattr.append(saveRttr[num])
             else:
-                attrname_RA.append("-")
-                reprattr.append("-")
+                attrname_RA.append('')
+                reprattr.append('')
                 
         # 대표결합키
         attrname_JK = []
@@ -261,35 +261,57 @@ def delete_attr(table_name):
                         conn.commit()
         
         #
-        #결합키 매핑
+        #결합키, 대표속성 매핑
         #
         join_key_list = {}
         cur.execute('SELECT `key_id`, `key_name` FROM `STD_JOIN_KEY`')
         for key_id, key_name in cur.fetchall():
             join_key_list[key_name] = key_id
 
+        repr_attr_list = {}
+        cur.execute('SELECT `repr_attr_id`, `repr_attr_name` FROM `STD_REPR_ATTR`')
+        for repr_attr_id, repr_attr_name in cur.fetchall():
+            repr_attr_list[repr_attr_name] = repr_attr_id
+
         for key in request.form.keys():
 
-            #결합키 삭제
+            #결합키, 대표 속성 삭제
             if request.form[key] == 'Null' and key[:-3] not in Delete:
-                checklist = []
-                attr_name = key[:-3]
-                cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
-                for att in cur.fetchall():
-                    checklist.append(att[0])
                 
-                if attr_name not in checklist:
-                    continue
-                else:
-                    cur.execute(f'DELETE FROM JOIN_KEY WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
-                    conn.commit()
-                    continue
-
-            #결합키 새로 추가 or 변경
-            elif request.form[key] != 'Null' and key[:-3] not in Delete:
-                attr_name = key[:-3]
-
                 if key[-2:] == 'JK':
+                    checklist = []
+                    attr_name = key[:-3]
+                    cur.execute(f'SELECT attr_name FROM JOIN_KEY WHERE table_name ="{tabledname}"')
+                    for att in cur.fetchall():
+                        checklist.append(att[0])
+                
+                    if attr_name not in checklist:
+                        continue
+                    else:
+                        cur.execute(f'DELETE FROM JOIN_KEY WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
+                        conn.commit()
+                        continue
+
+                if key[-2:] == 'RA':
+                    checklist = []
+                    attr_name = key[:-3]
+                    cur.execute(f'SELECT attr_name FROM REPR_ATTR WHERE table_name ="{tabledname}"')
+                    for att in cur.fetchall():
+                        checklist.append(att[0])
+                    
+                    if attr_name not in checklist:
+                        continue
+                    else:
+                        cur.execute(f'DELETE FROM REPR_ATTR WHERE attr_name = "{attr_name}" AND table_name = "{tabledname}"')
+                        conn.commit()
+                        continue
+
+
+            #결합키, 대표 속성 새로 추가 or 변경
+            elif request.form[key] != 'Null' and key[:-3] not in Delete:
+                
+                if key[-2:] == 'JK':
+                    attr_name = key[:-3]
                     join_key_name = request.form[key]
                     join_key_id = join_key_list[join_key_name]
 
@@ -304,5 +326,23 @@ def delete_attr(table_name):
                         stmt = f'UPDATE JOIN_KEY SET JOIN_KEY_ID = "{join_key_id}" WHERE TABLE_NAME = "{table_name}" AND ATTR_NAME = "{attr_name}"'
                     cur.execute(stmt)
                     conn.commit()
+
+                if key[-2:] == 'RA':
+                    attr_name = key[:-3]
+                    repr_attr_name = request.form[key]
+                    repr_attr_id = repr_attr_list[repr_attr_name]
+
+                    checklist = []
+                    cur.execute(f'SELECT attr_name FROM REPR_ATTR WHERE table_name ="{tabledname}"')
+                    for att in cur.fetchall():
+                        checklist.append(att[0])
+
+                    if attr_name not in checklist:
+                        stmt = f'INSERT INTO `REPR_ATTR` VALUES ("{table_name}", "{attr_name}", {repr_attr_id})'
+                    else:
+                        stmt = f'UPDATE REPR_ATTR SET REPR_ATTR_ID = "{repr_attr_id}" WHERE TABLE_NAME = "{table_name}" AND ATTR_NAME = "{attr_name}"'
+                    cur.execute(stmt)
+                    conn.commit()
+
         
     return redirect(url_for('tablerevise.tablelist', table_name = tabledname)) 

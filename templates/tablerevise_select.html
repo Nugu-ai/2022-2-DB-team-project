@@ -277,7 +277,7 @@
                     <td>${datype[i] === "INT" ? parseInt(minv[numeric_count]) : minv[numeric_count]}</td>
                     <td>`+zerocount[numeric_count]+`</td>
                     <td>`+(zerocount[numeric_count]/parseInt(recordcount[i]))+`</td>
-                    <td>`+repr_attr[i]+`</td>
+                    <td class='RA'></td>
                     <td>`+candidate[i]+`</td>
                     <td class="JK"></td>
                 </tr>
@@ -299,7 +299,7 @@
                         <td>`+dist[i]+`</td>
                         <td>`+symbolcount[categoric_count]+`</td>
                         <td>`+(symbolcount[categoric_count]/parseInt(recordcount[i]))+`</td>
-                        <td>`+repr_attr[i]+`</td>
+                        <td class='RA'></td>
                         <td>`+candidate[i]+`</td>
                         <td class="JK"></td>
                     </tr>
@@ -435,6 +435,45 @@
 
                 // 결합키 후보가 아닐 경우 대표결합키 설정 불가능
                 if (iscandidate[attr.indexOf(attributeName)] === 'F') selectElement.disabled = true;
+
+                node.appendChild(selectElement);
+            }
+        })();
+
+        let RAList = document.querySelectorAll('.RA');
+        (async () => {
+            let fetchedAttrList = await fetch('/stdattr').then((res) => res.json());
+
+            for (const node of RAList) {
+                let attributeName = node.parentNode.id;
+
+                let selectElement = document.createElement('select');
+                selectElement.setAttribute('name', attributeName + '_RA');
+                selectElement.setAttribute('form', 'save');
+
+                let defaultOption = document.createElement('option');
+                if (attr_name_RA.includes(attributeName)) {
+                    // 대표속성 있는 속성
+                    let n = attr_name_RA.indexOf(attributeName);
+                    defaultOption.innerHTML = repr_attr[n];
+                } else {
+                    // 대표속성 없는 속성
+                    defaultOption.value = 'Null';
+                    defaultOption.innerHTML = '';
+                }
+                
+                selectElement.appendChild(defaultOption);
+                let blank = document.createElement('option');
+                blank.value = 'Null';
+                blank.innerHTML = '';
+                selectElement.appendChild(blank);
+
+                for (const stdattr of fetchedAttrList) {
+                    let optionElement = document.createElement('option');
+                    optionElement.value = stdattr;
+                    optionElement.innerHTML = stdattr;
+                    selectElement.appendChild(optionElement);
+                }
 
                 node.appendChild(selectElement);
             }
