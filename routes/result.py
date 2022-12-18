@@ -82,11 +82,12 @@ def scan_result(table_name):
     
     
     cursor.execute(numerical_row_sql)
-    numerical_rows = cursor.fetchall()
+    numeric_rows = cursor.fetchall()
+    numerical_rows = [list(numeric_rows[x]) for x in range(len(numeric_rows))]
     
     cursor.execute(categorical_row_sql)
-    categorical_rows = cursor.fetchall()
-    
+    categoric_rows = cursor.fetchall()
+    categorical_rows = [list(categoric_rows[x]) for x in range(len(categoric_rows))]
     for i in range(len(numerical_rows)) :
         represent_attr_sql = """
             SELECT repr_attr_name
