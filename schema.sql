@@ -64,7 +64,7 @@ CREATE TABLE NUMERIC_ATTR(
 -- Table STD_REPR_ATTR
 -- -----------------------------------------------------
 CREATE TABLE STD_REPR_ATTR(
-	repr_attr_id INT NOT NULL,
+	repr_attr_id INT NOT NULL AUTO_INCREMENT,
 	repr_attr_name VARCHAR(100),
 	PRIMARY KEY(repr_attr_id)
 );
@@ -99,7 +99,7 @@ CREATE TABLE REPR_ATTR(
 -- Table STD_JOIN_KEY
 -- -----------------------------------------------------
 CREATE TABLE STD_JOIN_KEY(
-	key_id INT NOT NULL,
+	key_id INT NOT NULL AUTO_INCREMENT,
 	key_name VARCHAR(100),
 	PRIMARY KEY(key_id)
 );
