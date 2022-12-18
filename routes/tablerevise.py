@@ -122,7 +122,6 @@ def tablelist(table_name):
         cur.execute(f'SELECT {numeric_attr} FROM {tabledname}')
         numeric_attr_data = cur.fetchall()
 
-    print(joinkey)
 
     return render_template(
         'tablerevise_select.html',
