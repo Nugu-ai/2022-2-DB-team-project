@@ -55,7 +55,7 @@ def scan_result(table_name):
     
     #수치속성들을 불러오는 SQL문
     numerical_row_sql = """
-        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count, null_count/record_count,  zero_count, zero_count/record_count,  min_value, max_value
+        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count, null_count/record_count,  zero_count, zero_count/record_count,  min_value, max_value, is_candidate
         From ATTR, NUMERIC_ATTR
         WHERE ATTR.table_name = NUMERIC_ATTR.table_name
         AND ATTR.attr_name = NUMERIC_ATTR.attr_name
@@ -64,7 +64,7 @@ def scan_result(table_name):
     
     #범주속성들을 불러오는 SQL문
     categorical_row_sql = """
-        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count,  null_count/record_count,  symbol_count
+        SELECT ATTR.attr_name, data_type, record_count, distinct_count, null_count,  null_count/record_count,  symbol_count, is_candidate
         From ATTR, CATEGORICAL_ATTR
         WHERE ATTR.table_name = CATEGORICAL_ATTR.table_name 
         AND ATTR.attr_name = CATEGORICAL_ATTR.attr_name
