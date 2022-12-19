@@ -1,10 +1,4 @@
 {% extends "index.html"  %}
-{% block head %}
-  <!--진행상황 동기화를 위해 새로고침 설정-->
-  {% if type == 'MULTIPLE' %}
-  <meta http-equiv="refresh" content="15;">
-  {% endif %}
-{% endblock %}
 {% block content %}
     <style>
         .title {
