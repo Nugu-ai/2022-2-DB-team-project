@@ -1,4 +1,10 @@
 {% extends "index.html"  %}
+{% block head %}
+  <!--진행상황 동기화를 위해 새로고침 설정-->
+  {% if type == 'MULTIPLE' %}
+  <meta http-equiv="refresh" content="15;">
+  {% endif %}
+{% endblock %}
 {% block content %}
     <style>
         .title {
@@ -32,11 +38,9 @@
         }
 
     </style>
-    <!-- <p style="margin-left:15%">단일 결합입니다</p> -->
     <h1 class="title">다중 결합</h1>
-    <h3 class="title">다중 결합 결과</h3>
+    <h3 class="title">결과 조회에서 다중 결합 결과를 확인할 수 있습니다</h3>
     <div class="container">
-        <h5>다중 결합 결과입니다</h5>
     </div>
     
 {% endblock %}

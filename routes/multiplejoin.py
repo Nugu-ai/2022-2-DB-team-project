@@ -105,15 +105,14 @@ def multiple_result(source_table_name_jk, target_tables):
         for target in range(target_selected):
             table_B = table_B_list[target]
             joined_table = f'다중결합테이블_{join_id}_{target+1}'
-
+            cur.execute(f'SELECT key_id FROM std_join_key where key_name = "{joinkey}"')
+            join_key_id = cur.fetchall()[0][0]
             cur.execute(
-                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-                [table_A])
+                f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_A}" AND join_key_id = {join_key_id}')
             table_A_attr = cur.fetchall()[0][0]
 
             cur.execute(
-                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-                [table_B])
+                f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_B}" AND join_key_id = {join_key_id}')
             table_B_attr = cur.fetchall()[0][0]
 
             cur.execute('SELECT record_count FROM attr WHERE table_name = %s', [table_A])
@@ -125,7 +124,7 @@ def multiple_result(source_table_name_jk, target_tables):
             source_success = 0
             target_success = 0
             finished = 0
-            join_stat = f'진행중({target}/{target_selected})'
+            join_stat = f'진행중({target+1}/{target_selected})'
 
             # 결합 테이블 리스트에 입력
 
