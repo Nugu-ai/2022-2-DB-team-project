@@ -206,11 +206,33 @@ def join_result(type, id, inner_id) :
     
     conn = db.get_db()
     cursor = conn.cursor()
-    
+
+
     if type == "SINGLE" :
         src_table = "단일결합테이블_{0}".format(id)
 
     else :
+
+        table_A_attr_list = []
+        table_B_attr_list = []
+        cursor.execute(f'SELECT attr_name FROM attr where table_name = {table_A}')
+        table_A_attr_list.append(cursor.fetchall())
+        cursor.execute(f'SELECT attr_name FROM attr where table_name = {table_B}')
+        table_B_attr_list.append(cursor.fetchall())
+        # 결합 테이블 생성
+        cursor.execute(
+            f'CREATE TABLE {joined_table} AS SELECT A.* FROM {table_A} AS A INNER JOIN {table_B} AS B ON A.{table_A_attr} = B.{table_B_attr}')
+        cursor.execute(f'SELECT COUNT(*) FROM {joined_table}')
+        joined_rec_num = cursor.fetchall()[0][0]
+        source_success = round(joined_rec_num / table_A_rec_count, 2)
+        target_success = round(joined_rec_num / table_B_rec_count, 2)
+        finished = 1
+        join_stat = f'완료({target}/{target_selected})'
+
+        cursor.execute(
+            f'UPDATE MULTIPLE_JOIN_TABLE_LIST SET joined_record_count = {joined_rec_num}, source_success_rate = {source_success}, target_success_rate = {target_success}, is_complete = {finished}, join_status = "{join_stat}"')
+        conn.commit()
+
         src_table = "다중결합테이블_{0}_{1}".format(id, inner_id)
     
     table_result_sql = """
