@@ -166,7 +166,7 @@ def single_result(source_table_name_jk, target_table):
         for i in cur.fetchall():
             table_state = i[0]
         # 결합이 완료되었거나 직전에 같은 결합을 실행한 경우 같은 페이지 띄움
-        if (table_state == 1 and table_A == table_A_name and table_B_name == table_B_name):
+        if (table_state == 1 and table_A == table_A_name and table_B== table_B_name):
             return render_template(
                 'singlejoin_result.html',
                 table_A=table_A,
