@@ -39,7 +39,7 @@ def scan_select():
     
     cursor.execute(select_table_sql)
     semi_tables = cursor.fetchall()
-    tables = [semi_tables[x] for x in range(len(semi_tables))]
+    tables = [list(semi_tables[x]) for x in range(len(semi_tables))]
     
     #스캔된 테이블들을 담은 배열에, 각 테이블의 레코드 개수 추가
     for i in range(len(tables)) :
