@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request
+from flask import Blueprint, render_template, session, redirect, url_for, request, current_app
 import db
 
 
@@ -44,11 +44,11 @@ def target_table_search(source_table_name_jk):
             reprattr = set(reprattr)
             if len(list(reprattr)) == 1:
                 for i in range(0, len(list(reprattr))):
-                    fin_reprattr = fin_reprattr + str(list(reprattr)[i][0])    
+                    fin_reprattr = fin_reprattr + str(list(reprattr)[i][0])
             else:
-                for i in range(0, len(list(reprattr)) - 1):
+                for i in range(0, len(list(reprattr))):
                     fin_reprattr = fin_reprattr + str(list(reprattr)[i][0]) + ', '
-                fin_reprattr += str(list(reprattr)[len(list(reprattr))][0])
+            fin_reprattr = fin_reprattr[:-2]
 
     
     return render_template(
