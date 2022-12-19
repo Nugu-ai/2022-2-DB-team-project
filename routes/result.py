@@ -108,14 +108,14 @@ def scan_result(table_name):
         
         #이 아랫부분 수정 필요할수도 있음 - sql 반환값이 없을 경우 어떻게 되는지 모름
         cursor.execute(represent_attr_sql)
-        if cursor.fetchone()[0] is None :
+        if cursor.fetchone() is None :
             val = "x"
         else :
             val = cursor.fetchone()[0]
         numerical_rows[i].append(val)
         
         cursor.execute(join_key_sql)
-        if cursor.fetchone()[0] is None :
+        if cursor.fetchone() is None :
             val = "x"
         else :
             val = cursor.fetchone()[0]
@@ -140,14 +140,14 @@ def scan_result(table_name):
         
         #이 아랫부분 수정 필요할수도 있음 - sql 반환값이 없을 경우 어떻게 되는지 모름
         cursor.execute(represent_attr_sql)
-        if cursor.fetchone()[0] is None :
+        if cursor.fetchone() is None :
             val = "x"
         else :
             val = cursor.fetchone()[0]
         categorical_rows[i].append(val)
         
         cursor.execute(join_key_sql)
-        if cursor.fetchone()[0] is None :
+        if cursor.fetchone() is None :
             val = "x"
         else :
             val = cursor.fetchone()[0]
