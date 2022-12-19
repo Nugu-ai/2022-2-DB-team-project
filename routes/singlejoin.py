@@ -89,17 +89,17 @@ def single_result(source_table_name_jk, target_table):
         cur.execute('SELECT COUNT(*) AS CNT FROM SINGLE_JOIN_TABLE_LIST')
         last_id = cur.fetchall()[0][0]
         join_id = last_id + 1
+        cur.execute(f'SELECT key_id FROM std_join_key where key_name = "{joinkey}"')
+        join_key_id = cur.fetchall()[0][0]
 
-        # 테이블 리스트가 비어있을 경우 리스트에 등록
+        # 테이블 리스트가 비어있을 경우
         if(join_id == 1):
             cur.execute(
-                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-                [table_A])
+                f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_A}" AND join_key_id = {join_key_id}')
             table_A_attr = cur.fetchall()[0][0]
 
             cur.execute(
-                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-                [table_B])
+                f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_B}" AND join_key_id = {join_key_id}')
             table_B_attr = cur.fetchall()[0][0]
 
             cur.execute('SELECT record_count FROM attr WHERE table_name = %s', [table_A])
@@ -166,7 +166,7 @@ def single_result(source_table_name_jk, target_table):
         for i in cur.fetchall():
             table_state = i[0]
         # 결합이 완료되었거나 직전에 같은 결합을 실행한 경우 같은 페이지 띄움
-        if (table_state == 1 and table_A == table_A_name and table_B== table_B_name):
+        if (table_state == 1 and table_A == table_A_name and table_B == table_B_name):
             return render_template(
                 'singlejoin_result.html',
                 table_A=table_A,
@@ -183,7 +183,7 @@ def single_result(source_table_name_jk, target_table):
                 joined_table=joined_table
             )
         # 결합을 하지 않은 상태일 경우, 결합을 진행하고 변동사항 업데이트
-        elif (table_state == 0):
+        elif table_state == 0:
             # 결합 테이블 생성
             cur.execute(
                 f'CREATE TABLE {joined_table} AS SELECT A.* FROM {table_A} AS A INNER JOIN {table_B} AS B ON A.{table_A_attr} = B.{table_B_attr}')
@@ -222,13 +222,11 @@ def single_result(source_table_name_jk, target_table):
 
         # 결합 리스트의 모든 테이블들이 결합 완료, 선택 된 테이블이 전과 다를 경우 결합 리스트에 등록
         cur.execute(
-            'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-            [table_A])
+            f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_A}" AND join_key_id = {join_key_id}')
         table_A_attr = cur.fetchall()[0][0]
 
         cur.execute(
-            'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
-            [table_B])
+            f'SELECT attr_name FROM JOIN_KEY WHERE table_name = "{table_B}" AND join_key_id = {join_key_id}')
         table_B_attr = cur.fetchall()[0][0]
 
         cur.execute('SELECT record_count FROM attr WHERE table_name = %s', [table_A])
@@ -261,4 +259,4 @@ def single_result(source_table_name_jk, target_table):
         target_success=target_success,
         join_stat=join_stat,
         joined_table=joined_table
-        )
+    )
