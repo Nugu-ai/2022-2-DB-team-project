@@ -90,7 +90,7 @@ def single_result(source_table_name_jk, target_table):
         last_id = cur.fetchall()[0][0]
         join_id = last_id + 1
 
-        # 테이블 리스트가 비어있을 경우
+        # 테이블 리스트가 비어있을 경우 리스트에 등록
         if(join_id == 1):
             cur.execute(
                 'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
