@@ -89,6 +89,52 @@ def single_result(source_table_name_jk, target_table):
         cur.execute('SELECT COUNT(*) AS CNT FROM SINGLE_JOIN_TABLE_LIST')
         last_id = cur.fetchall()[0][0]
         join_id = last_id + 1
+
+        # 테이블 리스트가 비어있을 경우
+        if(join_id == 1):
+            cur.execute(
+                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
+                [table_A])
+            table_A_attr = cur.fetchall()[0][0]
+
+            cur.execute(
+                'SELECT attr_name FROM JOIN_KEY WHERE table_name = %s',
+                [table_B])
+            table_B_attr = cur.fetchall()[0][0]
+
+            cur.execute('SELECT record_count FROM attr WHERE table_name = %s', [table_A])
+            table_A_rec_count = cur.fetchall()[0][0]
+            cur.execute('SELECT record_count FROM attr WHERE table_name = %s', [table_B])
+            table_B_rec_count = cur.fetchall()[0][0]
+
+            joined_rec_num = 0
+            source_success = 0
+            target_success = 0
+            finished = 0
+            join_stat = "진행중"
+
+            joined_table = f'단일결합테이블_{join_id}'
+
+            # 결합 테이블 리스트에 입력
+            cur.execute(
+                f'INSERT INTO SINGLE_JOIN_TABLE_LIST VALUES ({join_id}, "{table_A}", {table_A_rec_count}, "{table_A_attr}", "{table_B}", {table_B_rec_count}, "{table_B_attr}", "{joined_table}", "{joinkey}", {joined_rec_num}, {source_success}, {target_success}, {finished}, "{join_stat}")')
+            conn.commit()
+            return render_template(
+                'singlejoin_result.html',
+                table_A=table_A,
+                table_A_rec_count=table_A_rec_count,
+                table_A_attr=table_A_attr,
+                table_B=table_B,
+                table_B_rec_count=table_B_rec_count,
+                table_B_attr=table_B_attr,
+                joinkey=joinkey,
+                joined_rec_num=joined_rec_num,
+                source_success=source_success,
+                target_success=target_success,
+                join_stat=join_stat,
+                joined_table=joined_table
+            )
+
         # 원래 한 줄이었는데, 계속 에러 나서 그냥 풀어서 썼습니다
         cur.execute('SELECT source_table_name FROM SINGLE_JOIN_TABLE_LIST WHERE id = %s', [last_id])
         table_A_name = cur.fetchall()[0][0]
