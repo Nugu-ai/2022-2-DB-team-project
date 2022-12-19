@@ -138,7 +138,7 @@ def single_result(source_table_name_jk, target_table):
         # 원래 한 줄이었는데, 계속 에러 나서 그냥 풀어서 썼습니다
         cur.execute('SELECT source_table_name FROM SINGLE_JOIN_TABLE_LIST WHERE id = %s', [last_id])
         table_A_name = cur.fetchall()[0][0]
-        cur.execute('SELECT source_table_name FROM SINGLE_JOIN_TABLE_LIST WHERE id = %s', [last_id])
+        cur.execute('SELECT target_table_name FROM SINGLE_JOIN_TABLE_LIST WHERE id = %s', [last_id])
         table_B_name = cur.fetchall()[0][0]
         cur.execute('SELECT source_record_count FROM SINGLE_JOIN_TABLE_LIST WHERE id = %s', [last_id])
         table_A_rec_count = cur.fetchall()[0][0]
