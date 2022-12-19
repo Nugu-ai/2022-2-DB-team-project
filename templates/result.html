@@ -194,10 +194,10 @@
         {% endfor %}
 
           {% if type == "SINGLE" %}
-            <td> <a href = "location.href = '{{result_root}}JOINresult/SINGLE/{{row[0]}}/NONE/'">세부링크</a> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
+            <td> <a href = "href = '{{result_root}}JOINresult/SINGLE/{{row[0]}}/NONE/'">세부링크</a> <!--결합결과로 링크 이동 (아직 이름을 잘 모름)-->
             
           {% elif type == "MULTIPLE" %}
-            <td> <a href = "location.href = '{{result_root}}JOINresult/MULTIPLE/{{row[0]}}/{{row[1]}}/'">세부링크</a>
+            <td> <a href = "href = '{{result_root}}JOINresult/MULTIPLE/{{row[0]}}/{{row[1]}}/'">세부링크</a>
           
           {% endif %}
         </tr>
