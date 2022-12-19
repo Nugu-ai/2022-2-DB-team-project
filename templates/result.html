@@ -85,7 +85,7 @@
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
   <div class="container">
-    <button type="button" onclick="tableToCSV()">
+    <button type="button" onclick="tableToCSV('{{table_name}}_scan.csv')">
       download CSV
   </button>
   </div>
