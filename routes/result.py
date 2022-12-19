@@ -48,7 +48,7 @@ def scan_select():
             FROM {0}
         """.format(tables[i][0])
         cursor.execute(count_record_sql)
-        tables[i][1] = cursor.fetchone()[0]
+        tables[i].append(cursor.fetchone()[0])
         
     
     return render_template("result.html",result_root = result_root,
@@ -108,6 +108,7 @@ def scan_result(table_name):
         
         #이 아랫부분 수정 필요할수도 있음 - sql 반환값이 없을 경우 어떻게 되는지 모름
         cursor.execute(represent_attr_sql)
+        val = cursor.fetchone()[0]
         numerical_rows[i].append(cursor.fetchone()[0])
         
         cursor.execute(join_key_sql)
