@@ -77,7 +77,10 @@ def single_result(source_table_name_jk, target_table):
     target_success = 결합 성공률(W2)
     finished: 0: 진행중 1: 완료
     join_stat: 결합 진행 상황 (표시)
+
+    결합은 1초 후에 진행되며, 새로고침과 함께 결합 데이터가 표시됩니다
     """
+
     # db 연결
     conn = db.get_db()
     with conn:
@@ -132,7 +135,8 @@ def single_result(source_table_name_jk, target_table):
                 source_success=source_success,
                 target_success=target_success,
                 join_stat=join_stat,
-                joined_table=joined_table
+                joined_table=joined_table,
+                table_state=finished
             )
 
         # 원래 한 줄이었는데, 계속 에러 나서 그냥 풀어서 썼습니다
@@ -180,7 +184,8 @@ def single_result(source_table_name_jk, target_table):
                 source_success=source_success,
                 target_success=target_success,
                 join_stat=join_stat,
-                joined_table=joined_table
+                joined_table=joined_table,
+                table_state=table_state
             )
         # 결합을 하지 않은 상태일 경우, 결합을 진행하고 변동사항 업데이트
         elif table_state == 0:
@@ -258,5 +263,6 @@ def single_result(source_table_name_jk, target_table):
         source_success=source_success,
         target_success=target_success,
         join_stat=join_stat,
-        joined_table=joined_table
+        joined_table=joined_table,
+        table_state=finished
     )
