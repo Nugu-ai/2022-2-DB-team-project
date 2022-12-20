@@ -124,11 +124,14 @@
 {% elif type == 'scan_result' %}
   <!--csv파일 다운로드 버튼-->
   <div class="container">
-    <button type="button" onclick="tableToCSV('{{table_name}}_scan.csv')">
-      download CSV
+    <button type="button" onclick="numericalTableToCSV('{{table_name}}_scan.csv')">
+      수치속성 CSV
+  </button>
+    <button type="button" onclick="categoricalTableToCSV('{{table_name}}_scan.csv')">
+      범주속성 CSV
   </button>
   <!--숫자 스캔결과-->
-  <table id = "csvtable">
+  <table id = "numerical_result">
     <caption>{{table_name}}|수치 속성</caption>
     <thead>
       <tr>
@@ -294,6 +297,71 @@
 
       window.location.href = address;
     }
+
+    function numericalTableToCSV(file_name) {
+
+      // Variable to store the final csv data
+      var csv_data = [];
+
+      // Get each row data
+      var rows = document.querySelectorAll('#numerical_result tr');
+      for (var i = 0; i < rows.length; i++) {
+
+          // Get each column data
+          var cols = rows[i].querySelectorAll('td,th');
+
+          // Stores each csv row data
+          var csvrow = [];
+          for (var j = 0; j < cols.length; j++) {
+
+              // Get the text data of each cell
+              // of a row and push it to csvrow
+              csvrow.push(cols[j].innerHTML);
+          }
+
+          // Combine each column value with comma
+          csv_data.push(csvrow.join(","));
+      }
+
+      // Combine each row data with new line character
+      csv_data = csv_data.join('\n');
+
+      // Call this function to download csv file
+      downloadCSVFile(csv_data,file_name);
+
+    }
+    function categoricalTableToCSV(file_name) {
+
+      // Variable to store the final csv data
+      var csv_data = [];
+
+      // Get each row data
+      var rows = document.querySelectorAll('#categorical_result tr');
+      for (var i = 0; i < rows.length; i++) {
+
+          // Get each column data
+          var cols = rows[i].querySelectorAll('td,th');
+
+          // Stores each csv row data
+          var csvrow = [];
+          for (var j = 0; j < cols.length; j++) {
+
+              // Get the text data of each cell
+              // of a row and push it to csvrow
+              csvrow.push(cols[j].innerHTML);
+          }
+
+          // Combine each column value with comma
+          csv_data.push(csvrow.join(","));
+      }
+
+      // Combine each row data with new line character
+      csv_data = csv_data.join('\n');
+
+      // Call this function to download csv file
+      downloadCSVFile(csv_data,file_name);
+
+  }
 
     function tableToCSV(file_name) {
 
