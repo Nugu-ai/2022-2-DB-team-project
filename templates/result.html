@@ -33,6 +33,9 @@
     text-align: center;
     margin-bottom: 20px;
   }
+  .join{
+    font-size: 9px;
+  }
 
   thead {
     background: #bbdefb;
@@ -213,7 +216,7 @@
     <button onclick = "tableToCSV( '{{type}}_JoinResult.csv' )">CSV로 다운로드</button> 
 
     <!--결과 테이블-->
-    <table>
+    <table class="join">
       <!--맨 윗행(설명하는부분)-->
       <thead>
         <tr>
@@ -261,7 +264,7 @@
 {%elif type == 'result'%}
   <div class = "container">
     <button onclick ="tableToCSV('{{type}}_{{id}}_{{inner_id}}_joinresult.csv')">CSV 다운로드</button>
-    <table>
+    <table class="join">
       {% for row in table_result %}
         <tr>
           {% for val in row %}
