@@ -12,6 +12,10 @@
     width: 150px;
     height: 30px;
   }
+  .title {
+            margin-left: 15%;
+            padding: 0 20px;
+  }
 
   .container {
             margin-left: 15%;
@@ -37,49 +41,80 @@
   td {
     border: 1px solid black;
   }
+  .button_container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  #title_button{
+    margin-right: 20px;
+    background-color: white;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    width: 100%
+  }
+  .table_button{
+    background-color: white;
+    border: none;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14.5px;
+    width: 100%
+  }
+
 
   button:hover {
     cursor: pointer;
 }
 </style>
-<p style="margin-left: 15%">결과조회입니다</p>
-
+<!-- <p style="margin-left: 15%">결과조회입니다</p> -->
+<h1 class="title">결과 조회 </h1>
 <!--하이퍼링크 버튼-->
-<div class="container">
-  <button onclick="location.href = '{{ result_root }}scan/' ">
-    파일 스캔
+<div class="container button_container">
+  <button id="title_button" onclick="location.href = '{{ result_root }}scan/' ">
+    속성 스캔 결과 조회
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE/' ">
-    단일 결합
+  <button id="title_button" onclick="location.href = '{{ result_root }}JOINlist/SINGLE/NONE/NONE/NONE/' ">
+    단일 결합 결과 조회
   </button>
-  <button onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE/' ">
-    다중 결합
+  <button id="title_button" onclick="location.href = '{{ result_root }}JOINlist/MULTIPLE/NONE/NONE/NONE/' ">
+    다중 결합 결과 조회
   </button>
 </div>
 
 <!--스캔 테이블 선택 화면-->
 {% if  type == 'scan_select' %}
-<div class="container" >SCANNED TABLES</div>
+<div class="container">
+  <h3>속성 스캔 완료 테이블 목록</h3>
+  <table>
+    <!--테이블 각 열 설명-->
+    <thead>
+      <tr>
+        <th>테이블 명</th>
+        <th>레코드 수</th>
+        <th>테이블 상세 버튼</th>
+      </tr>
+    </thead>
+    
+  
+    <!--테이블 내용 채우기-->
+    {% for row in table_rows %}
+      <tr>
+        {% for val in row %}
+          <td>{{val}}</td>
+        {% endfor %}
+          <td> <button class="table_button" onclick = "location.href = '{{result_root}}scan/{{row[0]}}/'">{{ row[0] }}</button> </td>
+      <tr>
+    {% endfor %}
+  
+  </table>
+  
+</div>
 
-<table style = "margin-left: 15%">
-  <!--테이블 각 열 설명-->
-  <tr>
-    <th>테이블 명</th>
-    <th>레코드 수</th>
-    <th>테이블 상세 버튼</th>
-  </tr>
-
-  <!--테이블 내용 채우기-->
-  {% for row in table_rows %}
-    <tr>
-      {% for val in row %}
-        <td>{{val}}</td>
-      {% endfor %}
-        <td> <button onclick = "location.href = '{{result_root}}scan/{{row[0]}}/'">{{ row[0] }}</button> </td>
-    <tr>
-  {% endfor %}
-
-</table>
 
 <!--스캔 결과 표시-->
 {% elif type == 'scan_result' %}
@@ -88,11 +123,10 @@
     <button type="button" onclick="tableToCSV('{{table_name}}_scan.csv')">
       download CSV
   </button>
-  </div>
-
   <!--숫자 스캔결과-->
-    <table style = "margin-left: 15%" id = "csvtable">
-      <caption>{{table_name}}|수치 속성</caption>
+  <table id = "csvtable">
+    <caption>{{table_name}}|수치 속성</caption>
+    <thead>
       <tr>
         <th>속성명</th>
         <th>데이터 타입</th>
@@ -108,19 +142,22 @@
         <th>대표 속성</th>
         <th>대표 결합키</th>
       </tr>
+    </thead>
 
-      {% for row in numeric_rows%}
-        <tr> 
-            {% for val in row %}
-              <td>{{val}}</td>
-            {% endfor %}
-        </tr>
-      {% endfor %}
-    </table>
 
-  <!--문자 스캔결과-->
-    <table style = "margin-left: 15%" id = "categorical_result">
-      <caption>{{table_name}}|범주 속성</caption>
+    {% for row in numeric_rows%}
+      <tr> 
+          {% for val in row %}
+            <td>{{val}}</td>
+          {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+
+<!--문자 스캔결과-->
+  <table id = "categorical_result">
+    <caption>{{table_name}}|범주 속성</caption>
+    <thead>
       <tr>
         <th>속성명</th>
         <th>데이터 타입</th>
@@ -134,15 +171,20 @@
         <th>대표 속성</th>
         <th>대표 결합키</th>
       </tr>
+    </thead>
+    
 
-      {% for rows in categoric_rows%}
-        <tr> 
-            {% for vals in rows %}
-              <td>{{vals}}</td>
-            {% endfor %}
-        </tr>
-      {% endfor %}
-    </table>
+    {% for rows in categoric_rows%}
+      <tr> 
+          {% for vals in rows %}
+            <td>{{vals}}</td>
+          {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+  </div>
+
+  
   
 {% elif type == 'SINGLE' or type == 'MULTIPLE' %}
   <!--단일결합 결과조회-->
@@ -166,26 +208,29 @@
     <!--결과 테이블-->
     <table>
       <!--맨 윗행(설명하는부분)-->
-      <tr>
-        <th>ID</th>
-        {% if type == "MULTIPLE" %}
-          <th>Inner ID</th>
-        {% endif %}
-        <th>테이블 A</th>
-        <th>A 레코드수</th>
-        <th>A 결합키</th>
-        <th>테이블 B</th>
-        <th>B 레코드수</th>
-        <th>B 결합키</th>
-        <th>결합테이블 이름</th>
-        <th>결합키(표준이름)</th>
-        <th>결합테이블 레코드수</th>
-        <th>A 결합 성공률</th>
-        <th>B 결합 성공률</th>
-        <th>완료여부</th>
-        <th>진행률</th>
-        <th>결과링크</th>
-      </tr>
+      <thead>
+        <tr>
+          <th>ID</th>
+          {% if type == "MULTIPLE" %}
+            <th>Inner ID</th>
+          {% endif %}
+          <th>테이블 A</th>
+          <th>A 레코드수</th>
+          <th>A 결합키</th>
+          <th>테이블 B</th>
+          <th>B 레코드수</th>
+          <th>B 결합키</th>
+          <th>결합테이블 이름</th>
+          <th>결합키(표준이름)</th>
+          <th>결합테이블 레코드수</th>
+          <th>A 결합 성공률</th>
+          <th>B 결합 성공률</th>
+          <th>완료여부</th>
+          <th>진행률</th>
+          <th>결과링크</th>
+        </tr>
+      </thead>
+      
       <!--테이블 내용 완성-->
       {% for row in joined_result %}
         <tr>
