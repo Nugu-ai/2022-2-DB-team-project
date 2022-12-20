@@ -89,9 +89,12 @@ def single_result(source_table_name_jk, target_table):
         table_A = source_table_name_jk.split('+')[0]
         joinkey = source_table_name_jk.split('+')[1]
         table_B = target_table
-        cur.execute('SELECT COUNT(*) AS CNT FROM SINGLE_JOIN_TABLE_LIST')
+        cur.execute('SELECT MAX(id) FROM SINGLE_JOIN_TABLE_LIST')
         last_id = cur.fetchall()[0][0]
-        join_id = last_id + 1
+        if last_id is None:
+            join_id = 1
+        else:
+            join_id = last_id + 1
         cur.execute(f'SELECT key_id FROM std_join_key where key_name = "{joinkey}"')
         join_key_id = cur.fetchall()[0][0]
 

@@ -168,29 +168,10 @@ def scan_result(table_name):
 @bp.route("/JOINlist/<type>/<used_table>/<join_ratio_limit>/<min_record_num_limit>/")
 def single_select(type,used_table, join_ratio_limit, min_record_num_limit):
     global result_root
-    
+
     conn = db.get_db()
     cursor = conn.cursor()
 
-    if type == "MULTIPLE":
-        cursor.execute(f'SELECT * FROM multiple_join_table_list where is_complete = 0')
-        request_table = cursor.fetchall()
-        cursor.execute(f'SELECT COUNT(*) AS CNT FROM MULTIPLE_JOIN_TABLE_LIST where is_complete = 0')
-        request_num = cursor.fetchall()[0][0]
-        for requests in range(request_num):
-            cursor.execute(
-                f'CREATE TABLE {request_table[requests][8]} AS SELECT A.* FROM {request_table[requests][2]} AS A INNER JOIN {request_table[requests][5]} AS B ON A.{request_table[requests][4]} = B.{request_table[requests][7]}')
-            cursor.execute(f'SELECT COUNT(*) FROM {request_table[requests][8]}')
-            joined_rec_num = cursor.fetchall()[0][0]
-            source_success = round(joined_rec_num / request_table[requests][3], 2)
-            target_success = round(joined_rec_num / request_table[requests][6], 2)
-            finished = 1
-            not_joined = request_table[requests][14]
-            join_stat = f'완료("{not_joined[5]}"/{not_joined[7]})'
-            cursor.execute(
-                f'UPDATE MULTIPLE_JOIN_TABLE_LIST SET joined_record_count = {joined_rec_num}, source_success_rate = {source_success}, target_success_rate = {target_success}, is_complete = {finished}, join_status = "{join_stat}"')
-            conn.commit()
-    
     #기본 sql문
     joined_result_sql = """
     SELECT * 
@@ -212,11 +193,43 @@ def single_select(type,used_table, join_ratio_limit, min_record_num_limit):
     
     cursor.execute(joined_result_sql)
     joined_result = cursor.fetchall()
+
+    if type == "MULTIPLE":
+        cursor.execute(f'SELECT * FROM multiple_join_table_list where is_complete = 0')
+        join_request = cursor.fetchall()
+        if join_request:
+            join_request = join_request[0]
+            cursor.execute(
+                f'CREATE TABLE {join_request[8]} AS SELECT A.* FROM {join_request[2]} AS A INNER JOIN {join_request[5]} AS B ON A.{join_request[4]} = B.{join_request[7]}')
+            cursor.execute(f'SELECT COUNT(*) FROM {join_request[8]}')
+            joined_rec_num = cursor.fetchall()[0][0]
+            source_success = round(joined_rec_num / join_request[3], 2)
+            target_success = round(joined_rec_num / join_request[6], 2)
+            finished = 1
+            result_val = join_request[14]
+            join_stat = "완료 " + result_val[3:8]
+            cursor.execute(
+                f'UPDATE MULTIPLE_JOIN_TABLE_LIST SET joined_record_count = {joined_rec_num}, source_success_rate = {source_success}, target_success_rate = {target_success}, is_complete = {finished}, join_status = "{join_stat}" WHERE id ={join_request[0]} AND inner_id ={join_request[1]}')
+            conn.commit()
+            return render_template("result.html",
+                            type=type,
+                            result_root=result_root,
+                            joined_result=joined_result,
+                            table_state=0
+                            )
+        else:
+            return render_template("result.html",
+                            type=type,
+                            result_root=result_root,
+                            joined_result=joined_result,
+                            table_state=1
+                            )
     
     return render_template("result.html",
                            type = type,
                            result_root = result_root,
-                           joined_result = joined_result)
+                           joined_result = joined_result,
+                           )
 
 @bp.route("/JOINresult/<type>/<id>/<inner_id>/")
 def join_result(type, id, inner_id) :

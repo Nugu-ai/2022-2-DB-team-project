@@ -93,14 +93,12 @@ def multiple_result(source_table_name_jk, target_tables):
         table_B_list = target_tables.split('+')
         table_B_list.remove('')
         target_selected = len(table_B_list)
-        cur.execute('SELECT COUNT(*) AS CNT FROM MULTIPLE_JOIN_TABLE_LIST')
-        list_count = cur.fetchall()[0][0]
-        if list_count == 0:
+        cur.execute('SELECT MAX(id) FROM MULTIPLE_JOIN_TABLE_LIST')
+        max_id = cur.fetchall()[0][0]
+        if max_id is None:
             join_id = 1
         else:
-            cur.execute('SELECT id FROM MULTIPLE_JOIN_TABLE_LIST')
-            last_id = cur.fetchall()[list_count-1][0]
-            join_id = last_id+1
+            join_id = max_id+1
 
         for target in range(target_selected):
             table_B = table_B_list[target]
