@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 import db
 
 
@@ -7,11 +7,14 @@ bp = Blueprint('preferences', __name__, url_prefix='/preferences', template_fold
 # ===================================================
 # 
 # ===================================================
+
 @bp.route('/', methods=['GET', 'POST'])
 def preferences():
-    if request.method == 'GET':
-
+    if request.method == 'GET' and 'database' in session:
         return render_template('preferences.html')
+
+    else:
+        return redirect(url_for('dblogin.dblogin'))
 
 
 # ===================================================

@@ -14,12 +14,16 @@ bp = Blueprint('result', __name__, url_prefix='/result', template_folder='templa
 """
 
 #처음 기본화면
-@bp.route('/')
+@bp.route('/', methods=['GET'])
 def select():
     global result_root 
     result_root = url_for('result.select')
-    
-    return render_template("result.html",result_root = result_root)
+    if 'database' in session:
+        return render_template("result.html",result_root = result_root)
+    else:
+        return redirect(url_for('dblogin.dblogin'))
+
+
 
 
 #스캔 결과조회 화면
